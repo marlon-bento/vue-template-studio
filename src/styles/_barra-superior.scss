@@ -1,0 +1,88 @@
+/*
+========
+Barra superior do editor e seletor de idioma (src/styles/_barra-superior.scss).
+Controla o cabeçalho do estúdio (.vc-topo), input de título, seletor de formato em pílula e LocaleSwitcher.
+========
+*/
+
+.vc-topo {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  background: var(--vue-template-studio-panel);
+  border-bottom: 1px solid var(--vue-template-studio-border);
+  z-index: 10;
+}
+
+.vc-topo-esq,
+.vc-topo-dir {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.vc-titulo-input {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--vue-template-studio-text);
+  padding: 5px 9px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  width: 190px;
+  transition: all 0.15s ease;
+
+  &:hover,
+  &:focus {
+    background: var(--vue-template-studio-surface);
+    border-color: var(--vue-template-studio-border);
+    outline: none;
+  }
+}
+
+.vc-formato-select {
+  padding: 5px 11px;
+  border-radius: 9999px;
+  border: 1px solid var(--vue-template-studio-border);
+  background: var(--vue-template-studio-surface);
+  color: var(--vue-template-studio-text);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover,
+  &:focus {
+    border-color: var(--vue-template-studio-primary);
+    outline: none;
+  }
+}
+
+.vc-dimensoes-custom-topo {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.vc-pill-topo-dim {
+  width: 82px;
+  min-height: 28px !important;
+  padding: 3px 8px !important;
+}
+
+.locale-switcher {
+  display: inline-flex;
+  align-items: center;
+
+  &.fica-na-direita {
+    margin-left: auto;
+  }
+}
+
+.locale-changer {
+  display: inline-flex;
+  align-items: center;
+}

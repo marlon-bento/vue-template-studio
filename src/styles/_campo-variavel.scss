@@ -1,0 +1,211 @@
+/*
+========
+Autocompletar de variáveis com {{ e destaque inline no campo de texto (src/styles/_campo-variavel.scss).
+Estiliza o menu flutuante de sugestões, os badges em pílula e o stack backdrop + textarea transparente.
+========
+*/
+
+.vc-campo-texto-variavel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.vc-campo-texto-variavel-editor {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.vc-menu-variaveis {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 60;
+  background: var(--vue-template-studio-panel);
+  border: 1px solid var(--vue-template-studio-border);
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+  max-height: 190px;
+  overflow-y: auto;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.vc-menu-variaveis-topo {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--vue-template-studio-muted);
+  padding: 4px 6px;
+}
+
+.vc-menu-variaveis-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--vue-template-studio-text);
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s ease;
+
+  &:hover,
+  &.ativo {
+    background: var(--vue-template-studio-surface-hover);
+  }
+}
+
+.vc-menu-variaveis-rotulo {
+  font-size: 11px;
+  color: var(--vue-template-studio-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vc-menu-variaveis-vazio {
+  padding: 8px;
+  font-size: 11px;
+  color: var(--vue-template-studio-muted);
+  text-align: center;
+}
+
+.vc-preview-badges-texto {
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--vue-template-studio-surface);
+  border: 1px solid var(--vue-template-studio-border);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--vue-template-studio-text);
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.vc-badge-variavel {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  margin: 0 2px;
+  border-radius: 9999px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.35;
+  vertical-align: baseline;
+
+  &.vc-badge-variavel--valida {
+    background: color-mix(in srgb, var(--vue-template-studio-primary), transparent 82%);
+    border: 1px solid color-mix(in srgb, var(--vue-template-studio-primary), transparent 45%);
+    color: color-mix(in srgb, var(--vue-template-studio-primary), var(--vue-template-studio-text) 25%);
+  }
+
+  &.vc-badge-variavel--invalida {
+    background: color-mix(in srgb, var(--vue-template-studio-danger), transparent 82%);
+    border: 1px solid color-mix(in srgb, var(--vue-template-studio-danger), transparent 45%);
+    color: color-mix(in srgb, var(--vue-template-studio-danger), var(--vue-template-studio-text) 20%);
+  }
+}
+
+.vc-estudio.is-light {
+  .vc-badge-variavel--valida {
+    color: color-mix(in srgb, var(--vue-template-studio-primary), black 15%);
+  }
+
+  .vc-badge-variavel--invalida {
+    color: color-mix(in srgb, var(--vue-template-studio-danger), black 15%);
+  }
+}
+
+.vc-campo-texto-stack {
+  position: relative;
+  width: 100%;
+  border-radius: 8px;
+  background: var(--vue-template-studio-surface);
+}
+
+.vc-campo-texto-backdrop,
+.vc-campo-texto-textarea {
+  font-family: var(--vue-template-studio-font);
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: normal;
+  padding: 7px 9px;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.vc-campo-texto-backdrop {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--vue-template-studio-text);
+  z-index: 0;
+}
+
+.vc-campo-texto-textarea {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  background: transparent !important;
+  color: transparent !important;
+  caret-color: var(--vue-template-studio-text);
+  resize: vertical;
+
+  &::placeholder {
+    color: var(--vue-template-studio-muted);
+    opacity: 0.75;
+  }
+
+  &::selection {
+    background: color-mix(in srgb, var(--vue-template-studio-primary), transparent 65%);
+    color: transparent;
+  }
+}
+
+.vc-token-inline {
+  background: transparent;
+  border-radius: 4px;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+
+  &.vc-badge-variavel--valida {
+    background: color-mix(in srgb, var(--vue-template-studio-primary), transparent 78%);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--vue-template-studio-primary), transparent 45%);
+    color: color-mix(in srgb, var(--vue-template-studio-primary), var(--vue-template-studio-text) 25%);
+  }
+
+  &.vc-badge-variavel--invalida {
+    background: color-mix(in srgb, var(--vue-template-studio-danger), transparent 78%);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--vue-template-studio-danger), transparent 45%);
+    color: color-mix(in srgb, var(--vue-template-studio-danger), var(--vue-template-studio-text) 20%);
+  }
+}
+
+.vc-estudio.is-light .vc-token-inline {
+  &.vc-badge-variavel--valida {
+    color: color-mix(in srgb, var(--vue-template-studio-primary), black 15%);
+  }
+
+  &.vc-badge-variavel--invalida {
+    color: color-mix(in srgb, var(--vue-template-studio-danger), black 15%);
+  }
+}

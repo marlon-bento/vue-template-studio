@@ -1,0 +1,18 @@
+/*
+========
+Folha de estilos oficial da biblioteca vue-template-studio (src/styles/certificado.scss).
+Agrega todos os módulos SCSS mantendo integração nativa com as variáveis CSS do Tabler (--tblr-*)
+e customização via --vue-template-studio-*.
+========
+*/
+
+@use './variaveis';
+@use './base';
+@use './controles';
+@use './barra-superior';
+@use './paineis-laterais';
+@use './palco-canvas';
+@use './inspetor-figma';
+@use './painel-camadas';
+@use './campo-variavel';
+@use './visualizador';

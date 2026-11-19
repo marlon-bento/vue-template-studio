@@ -1,0 +1,66 @@
+/*
+========
+Variáveis CSS e integração nativa com o Tabler (src/styles/_variaveis.scss).
+Define todas as variáveis --vue-template-studio-* mapeadas para --tblr-* com fallback
+para uso standalone nos modos escuro e claro (.is-light) no editor e no visualizador.
+========
+*/
+
+.vc-estudio {
+  --vue-template-studio-bg: var(--tblr-body-bg, #141417);
+  --vue-template-studio-panel: var(--tblr-bg-surface, #1b1b20);
+  --vue-template-studio-surface: var(--tblr-bg-surface-secondary, #232329);
+  --vue-template-studio-surface-hover: var(
+    --tblr-bg-surface-tertiary,
+    color-mix(in srgb, var(--vue-template-studio-surface), var(--vue-template-studio-text) 7%)
+  );
+  --vue-template-studio-border: var(--tblr-border-color, #2e2e37);
+  --vue-template-studio-text: var(--tblr-body-color, #f4f4f5);
+  --vue-template-studio-muted: var(--tblr-secondary, #9ca3af);
+  --vue-template-studio-primary: var(--tblr-primary, #3b82f6);
+  --vue-template-studio-primary-fg: var(--tblr-primary-fg, #ffffff);
+  --vue-template-studio-primary-hover: color-mix(in srgb, var(--vue-template-studio-primary), black 12%);
+  --vue-template-studio-success: var(--tblr-success, #10b981);
+  --vue-template-studio-danger: var(--tblr-danger, #f43f5e);
+  --vue-template-studio-warning: var(--tblr-warning, #f59e0b);
+  --vue-template-studio-measure: var(--tblr-danger, #f43f5e);
+  --vue-template-studio-grid-dot: color-mix(in srgb, var(--vue-template-studio-text), transparent 90%);
+  --vue-template-studio-radius: var(--tblr-border-radius-lg, 10px);
+  --vue-template-studio-font: var(--tblr-font-sans-serif, 'Inter', system-ui, -apple-system, sans-serif);
+
+  &.is-light {
+    --vue-template-studio-bg: var(--tblr-body-bg, #f1f5f9);
+    --vue-template-studio-panel: var(--tblr-bg-surface, #ffffff);
+    --vue-template-studio-surface: var(--tblr-bg-surface-secondary, #f8fafc);
+    --vue-template-studio-surface-hover: var(
+      --tblr-bg-surface-tertiary,
+      color-mix(in srgb, var(--vue-template-studio-surface), var(--vue-template-studio-text) 6%)
+    );
+    --vue-template-studio-border: var(--tblr-border-color, #e2e8f0);
+    --vue-template-studio-text: var(--tblr-body-color, #0f172a);
+    --vue-template-studio-muted: var(--tblr-secondary, #64748b);
+    --vue-template-studio-grid-dot: color-mix(in srgb, var(--vue-template-studio-text), transparent 88%);
+  }
+}
+
+.vc-visualizador {
+  --vue-template-studio-bg: var(--tblr-body-bg, #141417);
+  --vue-template-studio-panel: var(--tblr-bg-surface, #1b1b20);
+  --vue-template-studio-surface: var(--tblr-bg-surface-secondary, #27272a);
+  --vue-template-studio-border: var(--tblr-border-color, #3f3f46);
+  --vue-template-studio-text: var(--tblr-body-color, #f4f4f5);
+  --vue-template-studio-muted: var(--tblr-secondary, #a1a1aa);
+  --vue-template-studio-primary: var(--tblr-primary, #2563eb);
+  --vue-template-studio-primary-fg: var(--tblr-primary-fg, #ffffff);
+  --vue-template-studio-grid-dot: color-mix(in srgb, var(--vue-template-studio-text), transparent 90%);
+
+  &.is-light {
+    --vue-template-studio-bg: var(--tblr-body-bg, #f1f5f9);
+    --vue-template-studio-panel: var(--tblr-bg-surface, #ffffff);
+    --vue-template-studio-surface: var(--tblr-bg-surface-secondary, #ffffff);
+    --vue-template-studio-border: var(--tblr-border-color, #cbd5e1);
+    --vue-template-studio-text: var(--tblr-body-color, #0f172a);
+    --vue-template-studio-muted: var(--tblr-secondary, #64748b);
+    --vue-template-studio-grid-dot: color-mix(in srgb, var(--vue-template-studio-text), transparent 88%);
+  }
+}

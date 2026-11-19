@@ -1,0 +1,108 @@
+/*
+========
+Seção inferior direita de camadas estilo Photoshop / Figma (src/styles/_painel-camadas.scss).
+Controla a lista de camadas, linhas com drag-and-drop, badges de tipo e ações rápidas.
+========
+*/
+
+.vc-secao-camadas {
+  height: 240px;
+  min-height: 36px;
+  border-top: 1px solid var(--vue-template-studio-border);
+  display: flex;
+  flex-direction: column;
+  background: var(--vue-template-studio-panel);
+  transition: height 0.2s ease;
+  flex-shrink: 0;
+
+  &.minimizado {
+    height: 35px;
+  }
+}
+
+.vc-camadas-lista {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.vc-camada-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 7px;
+  background: var(--vue-template-studio-surface);
+  border: 1px solid transparent;
+  cursor: grab;
+  transition: background 0.12s ease, border-color 0.12s ease, opacity 0.12s ease;
+
+  &:hover {
+    background: var(--vue-template-studio-surface-hover);
+  }
+
+  &.selecionada {
+    border-color: var(--vue-template-studio-primary);
+    background: color-mix(in srgb, var(--vue-template-studio-primary), transparent 84%);
+  }
+
+  &.arrastando {
+    opacity: 0.45;
+    cursor: grabbing;
+  }
+
+  &.alvo-drop-acima {
+    border-top: 2px solid var(--vue-template-studio-primary);
+  }
+
+  &.alvo-drop-abaixo {
+    border-bottom: 2px solid var(--vue-template-studio-primary);
+  }
+}
+
+.vc-drag-handle {
+  color: var(--vue-template-studio-muted);
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  cursor: grab;
+}
+
+.vc-camada-tipo-badge {
+  width: 22px;
+  height: 20px;
+  border-radius: 5px;
+  background: var(--vue-template-studio-panel);
+  border: 1px solid var(--vue-template-studio-border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--vue-template-studio-muted);
+  flex-shrink: 0;
+
+  svg {
+    width: 13px;
+    height: 13px;
+  }
+}
+
+.vc-camada-nome {
+  font-size: 12px;
+  color: var(--vue-template-studio-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.vc-camada-acoes {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}

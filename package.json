@@ -1,0 +1,82 @@
+{
+  "name": "vue-template-studio",
+  "private": false,
+  "version": "1.0.0",
+  "author": "Márlon Bento Azevedo (https://github.com/marlon-bento)",
+  "license": "MIT",
+  "description": "Highly customizable Vue 3 + TypeScript visual studio for layer-based template creation (Figma/Photoshop style), live preview, i18n (pt-BR, EN & custom locales), and high-DPI PDF/image export.",
+  "keywords": [
+    "vue",
+    "vue3",
+    "vue-3",
+    "vue-template-studio",
+    "template-editor",
+    "template-builder",
+    "certificate",
+    "certificado",
+    "badge",
+    "canvas",
+    "pdf",
+    "jspdf",
+    "qrcode",
+    "editor",
+    "layers",
+    "camadas",
+    "figma",
+    "i18n",
+    "vue-i18n",
+    "headless",
+    "typescript"
+  ],
+  "sideEffects": [
+    "**/*.css",
+    "**/*.scss"
+  ],
+  "type": "module",
+  "main": "./dist/vue-template-studio.umd.cjs",
+  "module": "./dist/vue-template-studio.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/vue-template-studio.js",
+      "require": "./dist/vue-template-studio.umd.cjs"
+    },
+    "./style.css": "./dist/style.css",
+    "./dist/style.css": "./dist/style.css"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "README.pt-BR.md"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "typecheck": "vue-tsc --noEmit",
+    "test": "vitest",
+    "test:run": "vitest run"
+  },
+  "peerDependencies": {
+    "vue": "^3.4.0"
+  },
+  "dependencies": {
+    "jspdf": "^2.5.1",
+    "qrcode": "^1.5.4",
+    "vue-i18n": "^11.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/qrcode": "^1.5.5",
+    "@vitejs/plugin-vue": "^5.0.0",
+    "@vue/test-utils": "^2.4.6",
+    "happy-dom": "^15.11.7",
+    "sass-embedded": "^1.80.0",
+    "typescript": "^5.4.0",
+    "vite": "^5.4.0",
+    "vite-plugin-dts": "^3.9.0",
+    "vitest": "^2.1.9",
+    "vue": "^3.4.21",
+    "vue-tsc": "^2.0.0"
+  }
+}

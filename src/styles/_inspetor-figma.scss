@@ -1,0 +1,143 @@
+/*
+========
+Inspetor de propriedades e matriz 3x3 estilo Figma Auto Layout (src/styles/_inspetor-figma.scss).
+Controla a seção superior de propriedades, o quadrado interativo 3x3, a barra de 6 botões de alinhamento
+e o badge de variável fixa do cliente.
+========
+*/
+
+.vc-secao-propriedades {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  &.minimizado {
+    flex: 0 0 auto;
+  }
+}
+
+.vc-figma-alignment-row {
+  display: grid;
+  grid-template-columns: 74px 1fr;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.vc-figma-col-direita {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  justify-content: space-between;
+}
+
+.vc-figma-quadrado-3x3 {
+  width: 74px;
+  height: 74px;
+  background: var(--vue-template-studio-surface);
+  border: 1px solid var(--vue-template-studio-border);
+  border-radius: 8px;
+  padding: 6px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 3px;
+}
+
+.vc-figma-ponto-3x3 {
+  border: none;
+  background: transparent;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.12s ease;
+
+  &:hover {
+    background: var(--vue-template-studio-surface-hover);
+
+    .vc-figma-dot {
+      transform: scale(1.35);
+      background: var(--vue-template-studio-text);
+    }
+  }
+
+  &.ativo {
+    background: color-mix(in srgb, var(--vue-template-studio-primary), transparent 82%);
+  }
+}
+
+.vc-figma-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--vue-template-studio-muted);
+  opacity: 0.65;
+  transition: transform 0.12s ease, background 0.12s ease;
+}
+
+.vc-figma-barrinhas {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+
+  i {
+    display: block;
+    width: 2.5px;
+    border-radius: 2px;
+    background: var(--vue-template-studio-primary);
+
+    &:nth-child(1) { height: 9px; }
+    &:nth-child(2) { height: 13px; }
+    &:nth-child(3) { height: 7px; }
+  }
+}
+
+.vc-figma-align-bar {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 3px;
+  background: var(--vue-template-studio-surface);
+  border: 1px solid var(--vue-template-studio-border);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.vc-align-btn {
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--vue-template-studio-muted);
+  cursor: pointer;
+  transition: all 0.12s ease;
+
+  &:hover {
+    background: var(--vue-template-studio-surface-hover);
+    color: var(--vue-template-studio-text);
+  }
+
+  &.ativo {
+    background: var(--vue-template-studio-primary);
+    color: var(--vue-template-studio-primary-fg);
+  }
+}
+
+.vc-variavel-fixa-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--vue-template-studio-primary), transparent 88%);
+  border: 1px solid color-mix(in srgb, var(--vue-template-studio-primary), transparent 55%);
+  color: var(--vue-template-studio-text);
+  font-size: 12px;
+  user-select: all;
+}

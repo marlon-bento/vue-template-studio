@@ -1,0 +1,179 @@
+/*
+========
+Docks laterais minimizáveis e blocos de inserção (src/styles/_paineis-laterais.scss).
+Define a estrutura dos painéis esquerdo e direito, cabeçalhos, caixas de upload,
+grade de formas rápidas e bloco de link do QR Code.
+========
+*/
+
+.vc-dock-esq {
+  width: 266px;
+  background: var(--vue-template-studio-panel);
+  border-right: 1px solid var(--vue-template-studio-border);
+  display: flex;
+  flex-direction: column;
+  transition: width 0.2s ease;
+  flex-shrink: 0;
+  min-height: 0;
+  overflow: hidden;
+
+  &.minimizado {
+    width: 40px;
+  }
+}
+
+.vc-dock-dir {
+  width: 304px;
+  background: var(--vue-template-studio-panel);
+  border-left: 1px solid var(--vue-template-studio-border);
+  display: flex;
+  flex-direction: column;
+  transition: width 0.2s ease;
+  flex-shrink: 0;
+  min-height: 0;
+  overflow: hidden;
+
+  &.minimizado {
+    width: 40px;
+  }
+}
+
+.vc-painel-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: var(--vue-template-studio-surface);
+  border-bottom: 1px solid var(--vue-template-studio-border);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--vue-template-studio-muted);
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.vc-painel-cabecalho-clicable {
+  cursor: pointer;
+
+  &:hover {
+    background: var(--vue-template-studio-surface-hover);
+    color: var(--vue-template-studio-text);
+  }
+}
+
+.vc-dock-vertical-label {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  margin: 16px auto;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--vue-template-studio-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.vc-collapse-btn {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--vue-template-studio-muted);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--vue-template-studio-surface-hover);
+    color: var(--vue-template-studio-text);
+  }
+}
+
+.vc-painel-scroll {
+  padding: 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+}
+
+.vc-bloco {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vc-bloco-sep {
+  padding-top: 10px;
+  border-top: 1px solid var(--vue-template-studio-border);
+}
+
+.vc-bloco-titulo {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--vue-template-studio-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.vc-upload-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+  padding: 10px;
+  border: 1px dashed var(--vue-template-studio-border);
+  border-radius: var(--vue-template-studio-radius);
+  font-size: 12px;
+  color: var(--vue-template-studio-text);
+  cursor: pointer;
+  background: var(--vue-template-studio-surface);
+  transition: border-color 0.15s ease;
+
+  &:hover {
+    border-color: var(--vue-template-studio-primary);
+  }
+}
+
+.vc-insercao-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.vc-grid-formas-figma {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.vc-btn-forma-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 4px;
+  text-align: center;
+  font-size: 11px;
+}
+
+.vc-bloco-link-qr {
+  background: color-mix(in srgb, var(--vue-template-studio-primary), transparent 94%);
+  border: 1px solid color-mix(in srgb, var(--vue-template-studio-primary), transparent 72%);
+  border-radius: 9px;
+  padding: 10px;
+}
+
+.vc-btn-link-qr {
+  border-color: color-mix(in srgb, var(--vue-template-studio-primary), transparent 55%);
+  color: var(--vue-template-studio-text);
+}

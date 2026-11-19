@@ -1,0 +1,74 @@
+/*
+========
+Componente visualizador e emissor de templates (src/styles/_visualizador.scss).
+Estiliza a barra de ferramentas em pílula, o palco pontilhado e a imagem renderizada do TemplateStudioViewer.
+========
+*/
+
+.vc-visualizador {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.vc-vis-barra {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.vc-vis-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 9999px;
+  border: 1px solid var(--vue-template-studio-border);
+  background: var(--vue-template-studio-surface);
+  color: var(--vue-template-studio-text);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover:not(:disabled) {
+    filter: brightness(1.08);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.vc-vis-btn-pdf {
+  background: var(--vue-template-studio-primary);
+  border-color: var(--vue-template-studio-primary);
+  color: var(--vue-template-studio-primary-fg);
+  font-weight: 600;
+}
+
+.vc-vis-palco {
+  background-color: var(--vue-template-studio-bg);
+  background-image: radial-gradient(var(--vue-template-studio-grid-dot) 1px, transparent 1px);
+  background-size: 20px 20px;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 360px;
+}
+
+.vc-vis-img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.55);
+}
+
+.vc-vis-carregando {
+  color: var(--vue-template-studio-muted);
+  font-size: 13px;
+}
