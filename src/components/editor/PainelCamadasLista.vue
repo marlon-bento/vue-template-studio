@@ -7,7 +7,7 @@ edição rápida de nome com duplo clique, visibilidade e bloqueio, com textos i
 -->
 <script setup lang="ts">
 import { ref, type FunctionalComponent } from 'vue';
-import type { ItemCamadaInvertida,TipoCamada } from '../../types/certificado';
+import type { ItemCamadaInvertida, TipoCamada } from '../../types/certificado';
 import { usarI18nCertificado } from '../../i18n';
 import { buildIcons } from '../../utils/svgFactory';
 import { svgs } from '../../styles/svgs';
@@ -23,6 +23,8 @@ export interface Props {
   vazioCamadas: string;
   classePainelCamadas?: string;
 }
+
+// Mapa de associação entre cada tipo de camada e seu ícone vetorial
 const mapaIconesCamada: Record<TipoCamada, FunctionalComponent> = {
   texto: icons.insert.text,
   variavel: icons.inspector.variable,
@@ -42,6 +44,7 @@ const mapaIconesCamada: Record<TipoCamada, FunctionalComponent> = {
 function obterIconeTipoCamada(tipo: TipoCamada): FunctionalComponent {
   return mapaIconesCamada[tipo] || icons.insert.frame;
 }
+
 defineProps<Props>();
 
 const emit = defineEmits<{
@@ -143,7 +146,13 @@ function finalizarDragCamada(): void {
     </div>
 
     <div v-if="!minimizado" class="vc-camadas-lista">
-      <slot name="camadas" :camadas="camadasInvertidas" :selecionada-id="camadaSelecionadaId">
+      <slot
+        name="camadas"
+        :camadas="camadasInvertidas"
+        :layers="camadasInvertidas"
+        :selecionada-id="camadaSelecionadaId"
+        :selected-id="camadaSelecionadaId"
+      >
         <div v-if="camadasInvertidas.length === 0" class="vc-vazio">
           {{ vazioCamadas }}
         </div>
@@ -169,9 +178,10 @@ function finalizarDragCamada(): void {
             <component :is="icons.layers.dragHandle" />
           </span>
 
-         <span class="vc-camada-tipo-badge">
+          <span class="vc-camada-tipo-badge">
             <component :is="obterIconeTipoCamada(camada.tipo)" />
           </span>
+
           <input
             v-if="camadaEditandoNomeId === camada.id"
             v-model="camada.nome"

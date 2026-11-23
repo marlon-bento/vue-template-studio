@@ -1,7 +1,7 @@
 /*
 ========
 Gerenciador explícito de criação, edição, dimensões de folha e ordenação de camadas (src/composables/gerenciadorDeCamadas.ts).
-Centraliza presets de formatos (A4, A5, Carta, Crachá, Cartão CR80, Quadrado e Custom),
+Centraliza presets de formatos (A4, A5, Carta/Letter, Crachá/Badge, Cartão/Card CR80, Quadrado/Square e Custom),
 drag & drop na lista invertida estilo Photoshop/Figma e fábricas de camadas com nomes padrão
 internacionalizados via vue-i18n.
 ========
@@ -9,14 +9,17 @@ internacionalizados via vue-i18n.
 import type {
   CamadaCertificado,
   DirecaoPontaSeta,
+  DirecaoPontaSetaCanonica,
   FormatoFolha,
+  FormatoFolhaCanonico,
   ModoExibicaoLink,
+  ModoExibicaoLinkCanonico,
   OrientacaoCertificado,
   PresetFormatoFolha,
   TemplateCertificado,
   TipoCamada
 } from '../types/certificado';
-import { CHAVE_VARIAVEL_LINK_QRCODE, gerarId } from '../utils/variaveis';
+import { CHAVE_VARIAVEL_LINK_QRCODE, clonarSeguro, gerarId } from '../utils/variaveis';
 import i18n from '../i18n';
 
 export interface DimensoesFolha {
@@ -28,6 +31,38 @@ export type AlvoDimensoesFolha =
   | OrientacaoCertificado
   | DimensoesFolha
   | Pick<TemplateCertificado, 'orientacao' | 'formato' | 'largura' | 'altura'>;
+
+// Mapa de equivalência entre IDs de formato de folha em português e inglês
+const MAPA_FORMATO_FOLHA: Record<FormatoFolha, FormatoFolhaCanonico> = {
+  a4: 'a4',
+  a5: 'a5',
+  carta: 'carta',
+  letter: 'carta',
+  cracha: 'cracha',
+  badge: 'cracha',
+  cartao: 'cartao',
+  card: 'cartao',
+  quadrado: 'quadrado',
+  square: 'quadrado',
+  custom: 'custom'
+};
+
+// Mapa de equivalência entre direções de ponta de seta em português e inglês
+const MAPA_DIRECAO_PONTA_SETA: Record<DirecaoPontaSeta, DirecaoPontaSetaCanonica> = {
+  esquerda: 'esquerda',
+  left: 'esquerda',
+  direita: 'direita',
+  right: 'direita',
+  ambas: 'ambas',
+  both: 'ambas'
+};
+
+// Mapa de equivalência entre modos de exibição de link em português e inglês
+const MAPA_MODO_EXIBICAO_LINK: Record<ModoExibicaoLink, ModoExibicaoLinkCanonico> = {
+  url: 'url',
+  texto: 'texto',
+  text: 'texto'
+};
 
 // Dimensões base em pixels (96 DPI) para folha A4 em paisagem e retrato
 export const DIMENSOES_CAMADAS_A4: Record<OrientacaoCertificado, DimensoesFolha> = {
@@ -47,7 +82,38 @@ export const PRESETS_FORMATOS_FOLHA: PresetFormatoFolha[] = [
 ];
 
 /*
- * Recebe: formato da folha, orientação e medidas customizadas opcionais.
+ * Recebe: identificador de formato de folha em português ou inglês.
+ * Devolve: formato canônico suportado pelos presets internos e pelo vue-i18n.
+ * Por que é usada: padroniza aliases em inglês como 'letter', 'badge', 'card' e 'square'.
+ */
+export function normalizarFormatoFolha(formato: FormatoFolha = 'a4'): FormatoFolhaCanonico {
+  return MAPA_FORMATO_FOLHA[formato] ?? 'a4';
+}
+
+/*
+ * Recebe: direção da ponta de seta em português ou inglês.
+ * Devolve: direção canônica ('esquerda', 'direita' ou 'ambas').
+ * Por que é usada: padroniza valores passados em inglês ou português para o renderizador de setas.
+ */
+export function normalizarDirecaoPontaSeta(
+  pontaSeta: DirecaoPontaSeta = 'direita'
+): DirecaoPontaSetaCanonica {
+  return MAPA_DIRECAO_PONTA_SETA[pontaSeta] ?? 'direita';
+}
+
+/*
+ * Recebe: modo de exibição de link em português ou inglês.
+ * Devolve: modo canônico ('url' ou 'texto').
+ * Por que é usada: permite que chamadas em inglês usando 'text' funcionem igualmente ao valor 'texto'.
+ */
+export function normalizarModoExibicaoLink(
+  modo: ModoExibicaoLink = 'url'
+): ModoExibicaoLinkCanonico {
+  return MAPA_MODO_EXIBICAO_LINK[modo] ?? 'url';
+}
+
+/*
+ * Recebe: formato da folha (PT ou EN), orientação e medidas customizadas opcionais.
  * Devolve: objeto DimensoesFolha com largura e altura em pixels.
  * Por que é usada: calcula as dimensões exatas da folha para qualquer formato predefinido ou personalizado.
  */
@@ -57,13 +123,15 @@ export function obterDimensoesPorFormato(
   larguraCustom?: number,
   alturaCustom?: number
 ): DimensoesFolha {
-  if (formato === 'custom') {
+  const formatoCanonico = normalizarFormatoFolha(formato);
+  if (formatoCanonico === 'custom') {
     const l = Math.max(120, Math.round(larguraCustom || 1123));
     const a = Math.max(120, Math.round(alturaCustom || 794));
     return { largura: l, altura: a };
   }
 
-  const preset = PRESETS_FORMATOS_FOLHA.find((p) => p.id === formato) || PRESETS_FORMATOS_FOLHA[0];
+  const preset =
+    PRESETS_FORMATOS_FOLHA.find((p) => p.id === formatoCanonico) || PRESETS_FORMATOS_FOLHA[0];
   if (preset.id === 'quadrado') {
     return { largura: preset.larguraBase, altura: preset.alturaBase };
   }
@@ -107,7 +175,7 @@ export function resolverDimensoesTemplate(alvo?: AlvoDimensoesFolha | null): Dim
     };
   }
 
-  if (tpl.formato && tpl.formato !== 'a4') {
+  if (tpl.formato && normalizarFormatoFolha(tpl.formato) !== 'a4') {
     return obterDimensoesPorFormato(tpl.formato, orientacao, tpl.largura, tpl.altura);
   }
 
@@ -304,7 +372,7 @@ export function criarCamadaLinha(orientacao: AlvoDimensoesFolha): CamadaCertific
 }
 
 /*
- * Recebe: orientação ou dimensões da folha e direção da ponta da seta.
+ * Recebe: orientação ou dimensões da folha e direção da ponta da seta (PT ou EN).
  * Devolve: objeto CamadaCertificado do tipo 'seta' centralizado.
  * Por que é usada: cria uma camada de seta direcional com nome traduzido no idioma ativo.
  */
@@ -331,7 +399,7 @@ export function criarCamadaSeta(
     corBorda: '#3b82f6',
     espessuraBorda: 3,
     estiloBorda: 'solid',
-    pontaSeta
+    pontaSeta: normalizarDirecaoPontaSeta(pontaSeta)
   };
 }
 
@@ -397,7 +465,7 @@ export function criarCamadaQrCode(
 }
 
 /*
- * Recebe: opções com orientação/dimensões, modo de exibição ('url' ou 'texto'), texto personalizado e fonte.
+ * Recebe: opções com orientação/dimensões, modo de exibição ('url', 'texto' ou 'text'), texto personalizado e fonte.
  * Devolve: objeto CamadaCertificado configurado com linkUrl apontando para {{link_qrcode}}.
  * Por que é usada: cria a camada especial de link vinculada ao QR Code, exibindo a URL completa ou texto clicável no PDF.
  */
@@ -408,7 +476,7 @@ export function criarCamadaLinkQrCode(opcoes: {
   fonte?: string;
 }): CamadaCertificado {
   const dim = resolverDimensoesTemplate(opcoes.orientacao);
-  const modo: ModoExibicaoLink = opcoes.modoExibicao === 'texto' ? 'texto' : 'url';
+  const modo = normalizarModoExibicaoLink(opcoes.modoExibicao);
   const tokenLink = `{{${CHAVE_VARIAVEL_LINK_QRCODE}}}`;
   const textoPadrao = String(i18n.global.t('painelInserir.textoPadraoLinkQr'));
   const textoFinal =
@@ -451,7 +519,7 @@ export function criarCamadaLinkQrCode(opcoes: {
  * Por que é usada: duplica camadas mantendo isolamento de referência e aplicando o sufixo (Cópia)/(Copy).
  */
 export function duplicarCamada(camada: CamadaCertificado): CamadaCertificado {
-  const copia: CamadaCertificado = JSON.parse(JSON.stringify(camada));
+  const copia: CamadaCertificado = clonarSeguro(camada);
   copia.id = gerarId('cam');
   copia.nome = `${copia.nome} ${String(i18n.global.t('camadasPadrao.sufixoCopia'))}`;
   copia.x += 20;

@@ -17,7 +17,12 @@ import type {
   LinhaMedidaAlt,
   MedidasAltResultado
 } from '../../composables/gerenciadorDePalco';
-import { gerarPathSvgQrCode, type SvgQrCodeEstilizado } from '../../utils/qrcode';
+import { normalizarDirecaoPontaSeta } from '../../composables/gerenciadorDeCamadas';
+import {
+  gerarPathSvgQrCode,
+  normalizarEstiloModuloQr,
+  type SvgQrCodeEstilizado
+} from '../../utils/qrcode';
 import { resolverConteudoInternoQrCode, resolverVariaveisTexto } from '../../utils/variaveis';
 import { usarI18nCertificado } from '../../i18n';
 import { buildIcons } from '../../utils/svgFactory';
@@ -158,7 +163,7 @@ function obterGeometriaSeta(camada: CamadaCertificado) {
   const esp = Math.max(1, camada.espessuraBorda ?? 3);
   const tamanhoPonta = Math.min(Math.max(10, esp * 3.2), w * 0.4, Math.max(12, h * 0.8));
   const ehSeta = camada.tipo === 'seta';
-  const direcao = camada.pontaSeta || 'direita';
+  const direcao = normalizarDirecaoPontaSeta(camada.pontaSeta);
   const temEsq = ehSeta && (direcao === 'esquerda' || direcao === 'ambas');
   const temDir = ehSeta && (direcao === 'direita' || direcao === 'ambas');
 
@@ -447,7 +452,7 @@ defineExpose({
                 height="100%"
                 preserveAspectRatio="xMidYMid meet"
                 :shape-rendering="
-                  !camada.estiloModulosQr || camada.estiloModulosQr === 'quadrado'
+                  normalizarEstiloModuloQr(camada.estiloModulosQr) === 'quadrado'
                     ? 'crispEdges'
                     : 'geometricPrecision'
                 "

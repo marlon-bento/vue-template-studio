@@ -1,7 +1,7 @@
 /*
 ========
 Suíte de testes das formas geométricas e vetoriais (tests/formas.spec.ts).
-Valida criação, renderização no Canvas 2D e edição no VCertificadoEditor para
+Valida criação, renderização no Canvas 2D e edição no TemplateStudioEditor para
 Círculo, Linha, Seta (pontas direita, esquerda e ambas) e Moldura com estilos de traço.
 ========
 */
@@ -9,7 +9,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import {
-  VCertificadoEditor,
+  TemplateStudioEditor,
   criarCamadaCirculo,
   criarCamadaLinha,
   criarCamadaMoldura,
@@ -79,7 +79,7 @@ describe('Escopo: Formas Geométricas e Elementos Visuais (Círculo, Linha, Seta
   });
 
   it('Deve permitir inserir Círculo, Linha e Seta pelos botões do editor e alterar ponta da seta no inspetor', async () => {
-    const wrapper = mount(VCertificadoEditor, {
+    const wrapper = mount(TemplateStudioEditor, {
       props: { modelValue: criarTemplateVazio('Editor Formas') }
     });
 

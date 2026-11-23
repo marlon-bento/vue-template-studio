@@ -1,6 +1,6 @@
 /*
 ========
-Suíte de testes do componente <VCertificadoVisualizador> (tests/visualizador.spec.ts).
+Suíte de testes do componente <TemplateStudioViewer> (tests/visualizador.spec.ts).
 Valida geração automática de preview ao montar, reatividade de dados/template,
 detecção e exposição de variáveis do template (slot #campos), exportação PDF/PNG e erros.
 ========
@@ -9,7 +9,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { defineComponent, nextTick, ref } from 'vue';
 import {
-  VCertificadoVisualizador,
+  TemplateStudioViewer,
   criarTemplateVazio,
   ehUrlImagemPreviewSegura,
   sanitizarUrlImagemPreview,
@@ -31,7 +31,7 @@ vi.mock('jspdf', () => {
   return { jsPDF: MockJsPDF };
 });
 
-describe('Escopo: Componente <VCertificadoVisualizador>', () => {
+describe('Escopo: Componente <TemplateStudioViewer>', () => {
   beforeEach(() => {
     resetarEstadoCertificado();
     instalarMockCanvas2D();
@@ -62,13 +62,13 @@ describe('Escopo: Componente <VCertificadoVisualizador>', () => {
     expect(temVariavelNoTemplate(tpl, 'nome_professor')).toBe(false);
 
     const HostComSlot = defineComponent({
-      components: { VCertificadoVisualizador },
+      components: { TemplateStudioViewer },
       setup() {
         const dados = ref({ nome_aluno: 'Maria', curso: 'Vue 3' });
         return { tpl, dados };
       },
       template: `
-        <VCertificadoVisualizador :template="tpl" :dados="dados" :gerar-imagem-ao-montar="false">
+        <TemplateStudioViewer :template="tpl" :dados="dados" :gerar-imagem-ao-montar="false">
           <template #campos="{ variaveis, temVariavel }">
             <div id="campos-dinamicos">
               <span id="lista-vars">{{ variaveis.join(',') }}</span>
@@ -76,12 +76,12 @@ describe('Escopo: Componente <VCertificadoVisualizador>', () => {
               <select v-if="temVariavel('nome_professor')" id="select-professor"></select>
             </div>
           </template>
-        </VCertificadoVisualizador>
+        </TemplateStudioViewer>
       `
     });
 
     const wrapper = mount(HostComSlot);
-    const vis = wrapper.findComponent(VCertificadoVisualizador);
+    const vis = wrapper.findComponent(TemplateStudioViewer);
 
     expect(vis.emitted('variaveis-detectadas')?.[0]?.[0]).toEqual(['nome_aluno', 'curso']);
     expect(wrapper.find('#lista-vars').text()).toBe('nome_aluno,curso');
@@ -93,7 +93,7 @@ describe('Escopo: Componente <VCertificadoVisualizador>', () => {
 
   it('Deve gerar imagem de pré-visualização automaticamente ao montar e emitir imagem-gerada', async () => {
     const tpl = criarTemplateVazio('Curso Vue');
-    const wrapper = mount(VCertificadoVisualizador, {
+    const wrapper = mount(TemplateStudioViewer, {
       props: {
         template: tpl,
         dados: { nome_aluno: 'Maria' }
@@ -113,7 +113,7 @@ describe('Escopo: Componente <VCertificadoVisualizador>', () => {
 
   it('Não deve gerar preview ao montar quando gerarImagemAoMontar=false', async () => {
     const tpl = criarTemplateVazio('Manual');
-    const wrapper = mount(VCertificadoVisualizador, {
+    const wrapper = mount(TemplateStudioViewer, {
       props: {
         template: tpl,
         dados: { nome_aluno: 'Pedro' },
@@ -130,7 +130,7 @@ describe('Escopo: Componente <VCertificadoVisualizador>', () => {
 
   it('Deve exportar PDF via método exposto e emitir pdf-gerado', async () => {
     const tpl = criarTemplateVazio('Exportação');
-    const wrapper = mount(VCertificadoVisualizador, {
+    const wrapper = mount(TemplateStudioViewer, {
       props: {
         template: tpl,
         dados: { nome_aluno: 'Ana' },
@@ -155,7 +155,7 @@ describe('Escopo: Componente <VCertificadoVisualizador>', () => {
       throw new Error('Canvas tainted');
     });
 
-    const wrapper = mount(VCertificadoVisualizador, {
+    const wrapper = mount(TemplateStudioViewer, {
       props: {
         template: criarTemplateVazio('Erro'),
         dados: {}
@@ -179,7 +179,7 @@ describe('Escopo: Componente <VCertificadoVisualizador>', () => {
 
     HTMLCanvasElement.prototype.toDataURL = vi.fn(() => 'javascript:alert(1)');
 
-    const wrapper = mount(VCertificadoVisualizador, {
+    const wrapper = mount(TemplateStudioViewer, {
       props: {
         template: criarTemplateVazio('Segurança'),
         dados: {}
@@ -195,7 +195,7 @@ describe('Escopo: Componente <VCertificadoVisualizador>', () => {
   });
 
   it('Deve suportar tema claro, labels customizados e modo unstyled', () => {
-    const wrapper = mount(VCertificadoVisualizador, {
+    const wrapper = mount(TemplateStudioViewer, {
       props: {
         template: criarTemplateVazio('Tema'),
         dados: {},
@@ -208,7 +208,7 @@ describe('Escopo: Componente <VCertificadoVisualizador>', () => {
     expect(wrapper.find('.vc-visualizador').classes()).toContain('is-light');
     expect(wrapper.text()).toContain('Gerar Documento');
 
-    const wrapperUnstyled = mount(VCertificadoVisualizador, {
+    const wrapperUnstyled = mount(TemplateStudioViewer, {
       props: {
         template: criarTemplateVazio('Headless'),
         dados: {},

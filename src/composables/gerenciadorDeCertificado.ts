@@ -21,10 +21,12 @@ import type {
 import { DIMENSOES_A4, renderizarParaCanvas2D } from '../utils/renderizador';
 import {
   PRESETS_FORMATOS_FOLHA,
+  normalizarFormatoFolha,
   obterDimensoesPorFormato,
   resolverDimensoesTemplate
 } from './gerenciadorDeCamadas';
 import {
+  clonarSeguro,
   extrairVariaveisTemplate,
   gerarId,
   resolverUrlClicavelCamada,
@@ -67,18 +69,30 @@ export const DEFAULT_VARIABLES = VARIAVEIS_PADRAO;
 export const globalCertificadoOptions = ref<CertificadoOptions>({
   unstyled: false,
   tema: 'dark',
+  theme: 'dark',
   locale: 'pt_br',
   mensagensIdioma: {},
+  localeMessages: {},
   exibirSeletorIdioma: true,
+  showLocaleSwitcher: true,
   permitirCriarVariavel: false,
+  allowCustomVariables: false,
   escalaExportacao: 2,
+  exportScale: 2,
   escalaPreview: 1.5,
+  previewScale: 1.5,
   qualidadeImagem: 0.95,
+  imageQuality: 0.95,
   zoomInicial: 0.66,
+  initialZoom: 0.66,
   limiteHistorico: 50,
+  historyLimit: 50,
   fontesDisponiveis: [...FONTES_PADRAO],
+  availableFonts: [...FONTES_PADRAO],
   variaveisDisponiveis: [],
+  availableVariables: [],
   dadosPreview: {},
+  previewData: {},
   labels: {},
   classes: {}
 });
@@ -118,7 +132,7 @@ export const normalizeVariableList = normalizarListaVariaveis;
 /*
  * Recebe: template completo, dicionário de dados e fator de escala.
  * Devolve: Promise<HTMLCanvasElement> renderizado nas dimensões do template.
- * Por que é usada: sincroniza temporariamente dimensões customizadas caso o template não seja A4 antes de renderizar.
+ * Por que é usada: resolve as dimensões do template e delega a renderização de forma isolada.
  */
 async function renderizarCanvasComDimensoesTemplate(
   template: TemplateCertificado,
@@ -126,17 +140,7 @@ async function renderizarCanvasComDimensoesTemplate(
   escala: number
 ): Promise<HTMLCanvasElement> {
   const dim = resolverDimensoesTemplate(template);
-  const orientacao = template.orientacao === 'portrait' ? 'portrait' : 'landscape';
-  const original = { ...DIMENSOES_A4[orientacao] };
-
-  DIMENSOES_A4[orientacao].largura = dim.largura;
-  DIMENSOES_A4[orientacao].altura = dim.altura;
-  try {
-    return await renderizarParaCanvas2D(template, dados, escala);
-  } finally {
-    DIMENSOES_A4[orientacao].largura = original.largura;
-    DIMENSOES_A4[orientacao].altura = original.altura;
-  }
+  return renderizarParaCanvas2D(template, dados, escala, dim);
 }
 
 /*
@@ -193,69 +197,96 @@ export function configureCertificado(options: Partial<CertificadoOptions>): void
     definirIdioma(options.locale);
   }
 
-  const temaResolvido = options.tema ?? options.theme ?? globalCertificadoOptions.value.tema;
+  const temaResolvido =
+    options.tema ??
+    options.theme ??
+    globalCertificadoOptions.value.tema ??
+    globalCertificadoOptions.value.theme;
   const exibirSeletorResolvido =
     options.exibirSeletorIdioma ??
     options.showLocaleSwitcher ??
-    globalCertificadoOptions.value.exibirSeletorIdioma;
+    globalCertificadoOptions.value.exibirSeletorIdioma ??
+    globalCertificadoOptions.value.showLocaleSwitcher;
   const permitirVariavelResolvido =
     options.permitirCriarVariavel ??
     options.allowCustomVariables ??
-    globalCertificadoOptions.value.permitirCriarVariavel;
+    globalCertificadoOptions.value.permitirCriarVariavel ??
+    globalCertificadoOptions.value.allowCustomVariables;
   const escalaExportResolvida =
     options.escalaExportacao ??
     options.exportScale ??
-    globalCertificadoOptions.value.escalaExportacao;
+    globalCertificadoOptions.value.escalaExportacao ??
+    globalCertificadoOptions.value.exportScale;
   const escalaPrevResolvida =
     options.escalaPreview ??
     options.previewScale ??
-    globalCertificadoOptions.value.escalaPreview;
+    globalCertificadoOptions.value.escalaPreview ??
+    globalCertificadoOptions.value.previewScale;
   const qualidadeResolvida =
     options.qualidadeImagem ??
     options.imageQuality ??
-    globalCertificadoOptions.value.qualidadeImagem;
+    globalCertificadoOptions.value.qualidadeImagem ??
+    globalCertificadoOptions.value.imageQuality;
   const zoomResolvido =
     options.zoomInicial ??
     options.initialZoom ??
-    globalCertificadoOptions.value.zoomInicial;
+    globalCertificadoOptions.value.zoomInicial ??
+    globalCertificadoOptions.value.initialZoom;
   const historicoResolvido =
     options.limiteHistorico ??
     options.historyLimit ??
-    globalCertificadoOptions.value.limiteHistorico;
+    globalCertificadoOptions.value.limiteHistorico ??
+    globalCertificadoOptions.value.historyLimit;
   const fontesResolvidas =
     options.fontesDisponiveis ??
     options.availableFonts ??
-    globalCertificadoOptions.value.fontesDisponiveis;
+    globalCertificadoOptions.value.fontesDisponiveis ??
+    globalCertificadoOptions.value.availableFonts;
   const variaveisResolvidas =
     options.variaveisDisponiveis ??
     options.availableVariables ??
-    globalCertificadoOptions.value.variaveisDisponiveis;
+    globalCertificadoOptions.value.variaveisDisponiveis ??
+    globalCertificadoOptions.value.availableVariables;
   const dadosPreviewInput = options.dadosPreview ?? options.previewData;
+  const dadosPreviewResolvidos =
+    dadosPreviewInput !== undefined
+      ? { ...dadosPreviewInput }
+      : globalCertificadoOptions.value.dadosPreview ?? globalCertificadoOptions.value.previewData;
+  const mensagensResolvidas =
+    mensagens !== undefined
+      ? {
+          ...(globalCertificadoOptions.value.mensagensIdioma || {}),
+          ...mensagens
+        }
+      : globalCertificadoOptions.value.mensagensIdioma;
 
   globalCertificadoOptions.value = {
     ...globalCertificadoOptions.value,
     ...options,
     tema: temaResolvido,
+    theme: temaResolvido,
     exibirSeletorIdioma: exibirSeletorResolvido,
+    showLocaleSwitcher: exibirSeletorResolvido,
     permitirCriarVariavel: permitirVariavelResolvido,
+    allowCustomVariables: permitirVariavelResolvido,
     escalaExportacao: escalaExportResolvida,
+    exportScale: escalaExportResolvida,
     escalaPreview: escalaPrevResolvida,
+    previewScale: escalaPrevResolvida,
     qualidadeImagem: qualidadeResolvida,
+    imageQuality: qualidadeResolvida,
     zoomInicial: zoomResolvido,
+    initialZoom: zoomResolvido,
     limiteHistorico: historicoResolvido,
+    historyLimit: historicoResolvido,
     fontesDisponiveis: fontesResolvidas,
+    availableFonts: fontesResolvidas,
     variaveisDisponiveis: variaveisResolvidas,
-    mensagensIdioma:
-      mensagens !== undefined
-        ? {
-            ...globalCertificadoOptions.value.mensagensIdioma,
-            ...mensagens
-          }
-        : globalCertificadoOptions.value.mensagensIdioma,
-    dadosPreview:
-      dadosPreviewInput !== undefined
-        ? { ...dadosPreviewInput }
-        : globalCertificadoOptions.value.dadosPreview,
+    availableVariables: variaveisResolvidas,
+    mensagensIdioma: mensagensResolvidas,
+    localeMessages: mensagensResolvidas,
+    dadosPreview: dadosPreviewResolvidos,
+    previewData: dadosPreviewResolvidos,
     labels: {
       ...globalCertificadoOptions.value.labels,
       ...options.labels
@@ -269,7 +300,7 @@ export function configureCertificado(options: Partial<CertificadoOptions>): void
 export const configureTemplateStudio = configureCertificado;
 
 /*
- * Recebe: nome opcional, orientação, formato de folha e dimensões customizadas opcionais.
+ * Recebe: nome opcional, orientação, formato de folha (PT ou EN) e dimensões customizadas opcionais.
  * Devolve: objeto TemplateCertificado vazio pronto para edição.
  * Por que é usada: inicializa um novo template em branco usando o título padrão do idioma ativo quando omitido.
  */
@@ -292,8 +323,9 @@ export function criarTemplateVazio(
   };
 
   if (formato) {
-    base.formato = formato;
-    const dim = obterDimensoesPorFormato(formato, orientacao, largura, altura);
+    const formatoCanonico = normalizarFormatoFolha(formato);
+    base.formato = formatoCanonico;
+    const dim = obterDimensoesPorFormato(formatoCanonico, orientacao, largura, altura);
     base.largura = dim.largura;
     base.altura = dim.altura;
   } else if (largura && altura) {
@@ -315,7 +347,7 @@ export function duplicarTemplate(
   template: TemplateCertificado,
   novoNome?: string
 ): TemplateCertificado {
-  const copia: TemplateCertificado = JSON.parse(JSON.stringify(template));
+  const copia: TemplateCertificado = clonarSeguro(template);
   copia.id = gerarId('tpl');
   copia.nome =
     novoNome || `${template.nome} ${String(i18n.global.t('camadasPadrao.sufixoCopia'))}`;
@@ -354,7 +386,7 @@ export function importarTemplateJson(json: string): TemplateCertificado {
     camadas: parsed.camadas
   };
 
-  if (parsed.formato) resultado.formato = parsed.formato;
+  if (parsed.formato) resultado.formato = normalizarFormatoFolha(parsed.formato);
   if (typeof parsed.largura === 'number' && parsed.largura >= 120) {
     resultado.largura = Math.round(parsed.largura);
   }
@@ -388,7 +420,12 @@ export function gerenciadorDeCertificado(options?: Partial<CertificadoOptions>) 
   ): Promise<string> {
     const escala =
       opcoes.escala ?? opcoes.scale ?? globalCertificadoOptions.value.escalaPreview ?? 1.5;
-    const qualidade = opcoes.qualidadeImagem ?? opcoes.imageQuality ?? 0.92;
+    const qualidade =
+      opcoes.qualidadeImagem ??
+      opcoes.imageQuality ??
+      opcoes.qualidade ??
+      opcoes.quality ??
+      0.92;
     const canvas = await renderizarCanvasComDimensoesTemplate(template, dados, escala);
     return canvas.toDataURL('image/png', qualidade);
   }
@@ -408,7 +445,10 @@ export function gerenciadorDeCertificado(options?: Partial<CertificadoOptions>) 
     const qualidade =
       opcoes.qualidadeImagem ??
       opcoes.imageQuality ??
+      opcoes.qualidade ??
+      opcoes.quality ??
       globalCertificadoOptions.value.qualidadeImagem ??
+      globalCertificadoOptions.value.imageQuality ??
       0.95;
 
     const canvas = await renderizarCanvasComDimensoesTemplate(template, dados, escala);
@@ -419,8 +459,9 @@ export function gerenciadorDeCertificado(options?: Partial<CertificadoOptions>) 
 
     const dim = resolverDimensoesTemplate(template);
     const padraoA4 = DIMENSOES_A4[template.orientacao] || DIMENSOES_A4.landscape;
+    const formatoNormalizado = template.formato ? normalizarFormatoFolha(template.formato) : 'a4';
     const ehA4Padrao =
-      (!template.formato || template.formato === 'a4') &&
+      formatoNormalizado === 'a4' &&
       dim.largura === padraoA4.largura &&
       dim.altura === padraoA4.altura;
 
@@ -497,7 +538,8 @@ export function gerenciadorDeCertificado(options?: Partial<CertificadoOptions>) 
    * Por que é usada: inicia o download do arquivo PDF gerado.
    */
   function baixarPdf(resultado: ResultadoExportacao): void {
-    dispararDownload(resultado.pdfBlob, resultado.nomeArquivo);
+    const nome = resultado.nomeArquivo || resultado.fileName || 'template.pdf';
+    dispararDownload(resultado.pdfBlob, nome);
   }
 
   /*
@@ -506,9 +548,11 @@ export function gerenciadorDeCertificado(options?: Partial<CertificadoOptions>) 
    * Por que é usada: inicia o download da imagem PNG gerada.
    */
   function baixarImagem(resultado: ResultadoExportacao): void {
-    if (!resultado.imagemBlob) return;
-    const nomePng = resultado.nomeArquivo.replace(/\.pdf$/i, '.png');
-    dispararDownload(resultado.imagemBlob, nomePng);
+    const blob = resultado.imagemBlob ?? resultado.imageBlob;
+    if (!blob) return;
+    const nome = resultado.nomeArquivo || resultado.fileName || 'template.pdf';
+    const nomePng = nome.replace(/\.pdf$/i, '.png');
+    dispararDownload(blob, nomePng);
   }
 
   return {

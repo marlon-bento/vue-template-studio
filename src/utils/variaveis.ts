@@ -7,7 +7,7 @@ e formatação segura de arquivos.
 ========
 */
 import type { CamadaCertificado, DadosCertificado, TemplateCertificado } from '../types/certificado';
-
+import { isProxy, toRaw } from 'vue';
 // Chave da variável especial disponibilizada automaticamente quando o template contém QR Code
 export const CHAVE_VARIAVEL_LINK_QRCODE = 'link_qrcode';
 export const QR_CODE_LINK_VARIABLE_KEY = CHAVE_VARIAVEL_LINK_QRCODE;
@@ -250,4 +250,40 @@ export function resolverUrlClicavelCamada(
   }
 
   return null;
+}
+/*
+ * Recebe: qualquer valor ou objeto possivelmente envolvido em Proxy reativo do Vue.
+ * Devolve: cópia limpa sem Proxies reativos.
+ * Por que é usada: permite usar structuredClone com segurança em estados reativos do Vue 3.
+ */
+function removerProxiesProfundo<T>(valor: T): T {
+  if (valor === null || typeof valor !== 'object') {
+    return valor;
+  }
+
+  const bruto = isProxy(valor) ? toRaw(valor) : valor;
+
+  if (Array.isArray(bruto)) {
+    return bruto.map((item) => removerProxiesProfundo(item)) as unknown as T;
+  }
+
+  const copia: Record<string, unknown> = {};
+  for (const [chave, val] of Object.entries(bruto)) {
+    copia[chave] = removerProxiesProfundo(val);
+  }
+  return copia as T;
+}
+
+
+/*
+ * Recebe: objeto ou valor a ser clonado profundamente.
+ * Devolve: nova instância isolada de referência.
+ * Por que é usada: substitui JSON.parse(JSON.stringify) com melhor desempenho e segurança para estados do Vue.
+ */
+export function clonarSeguro<T>(valor: T): T {
+  const limpo = removerProxiesProfundo(valor);
+  if (typeof structuredClone === 'function') {
+    return structuredClone(limpo);
+  }
+  return JSON.parse(JSON.stringify(limpo)) as T;
 }

@@ -11,11 +11,13 @@ com todos os textos e atributos de acessibilidade internacionalizados via vue-i1
 import { computed } from 'vue';
 import type {
   FormatoFolha,
+  FormatoFolhaCanonico,
   OrientacaoCertificado,
   TemplateCertificado
 } from '../../types/certificado';
 import {
   PRESETS_FORMATOS_FOLHA,
+  normalizarFormatoFolha,
   resolverDimensoesTemplate
 } from '../../composables/gerenciadorDeCamadas';
 import { usarI18nCertificado } from '../../i18n';
@@ -65,8 +67,10 @@ const emit = defineEmits<{
 // Função de tradução reativa conectada à instância global do vue-i18n
 const { t } = usarI18nCertificado();
 
-// Formato atual da folha selecionado no template (padrão A4)
-const formatoAtual = computed<FormatoFolha>(() => props.template.formato || 'a4');
+// Formato canônico atual da folha selecionado no template (padrão A4)
+const formatoAtual = computed<FormatoFolhaCanonico>(() =>
+  normalizarFormatoFolha(props.template.formato || 'a4')
+);
 
 // Dimensões efetivas de largura e altura da folha atual em pixels
 const dimensoesAtuais = computed(() => resolverDimensoesTemplate(props.template));
@@ -140,7 +144,12 @@ function aoAlterarAlturaCustom(ev: Event): void {
     </div>
 
     <div class="vc-topo-dir">
-      <slot name="topo-acoes" :template="template" :modo-preview="modoPreview" />
+      <slot
+        name="topo-acoes"
+        :template="template"
+        :modo-preview="modoPreview"
+        :preview-mode="modoPreview"
+      />
 
       <LocaleSwitcher v-if="exibirSeletorIdioma" />
 

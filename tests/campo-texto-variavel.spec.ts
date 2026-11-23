@@ -115,7 +115,7 @@ describe('CampoTextoVariavel - Autocompletar {{ e Badges Azul/Vermelho', () => {
     expect(badgesVermelhos[0].classes()).toContain('vc-badge-variavel--invalida');
   });
 
-  it('funciona integrado dentro do VCertificadoEditor em camadas do tipo texto', async () => {
+  it('funciona integrado dentro do TemplateStudioEditor em camadas do tipo texto', async () => {
     const templateInicial = criarTemplateVazio('Teste Editor Variaveis');
     const wrapper = mount(TemplateStudioEditor, {
       props: {

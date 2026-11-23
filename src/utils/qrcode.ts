@@ -1,12 +1,18 @@
 /*
 ========
 Gerador de matriz e paths SVG de QR Code customizável (src/utils/qrcode.ts).
-Suporta estilos de módulos (quadrado, arredondado, pontos/dots), estilos de olhos/cantos
-(quadrado, arredondado, círculo), área central limpa para Logo e nível de correção H.
+Suporta estilos de módulos (quadrado/square, arredondado/rounded, pontos/dots),
+estilos de olhos/cantos (quadrado/square, arredondado/rounded, circulo/circle),
+área central limpa para Logo e nível de correção H.
 ========
 */
 import QRCode from 'qrcode';
-import type { EstiloModuloQr, EstiloOlhoQr } from '../types/certificado';
+import type {
+  EstiloModuloQr,
+  EstiloModuloQrCanonico,
+  EstiloOlhoQr,
+  EstiloOlhoQrCanonico
+} from '../types/certificado';
 
 export interface MatrizQrCode {
   tamanho: number;
@@ -25,6 +31,46 @@ export interface SvgQrCodeEstilizado {
   path: string;
   pathOlhos: string;
   tamanho: number;
+}
+
+const MAPA_ESTILO_MODULO_QR: Record<EstiloModuloQr, EstiloModuloQrCanonico> = {
+  quadrado: 'quadrado',
+  square: 'quadrado',
+  arredondado: 'arredondado',
+  rounded: 'arredondado',
+  pontos: 'pontos',
+  dots: 'pontos'
+};
+
+const MAPA_ESTILO_OLHO_QR: Record<EstiloOlhoQr, EstiloOlhoQrCanonico> = {
+  quadrado: 'quadrado',
+  square: 'quadrado',
+  arredondado: 'arredondado',
+  rounded: 'arredondado',
+  circulo: 'circulo',
+  circle: 'circulo'
+};
+
+/*
+ * Recebe: estilo dos módulos do QR Code em português ou inglês.
+ * Devolve: estilo canônico ('quadrado', 'arredondado' ou 'pontos').
+ * Por que é usada: permite configurar estilos de módulos em português e inglês.
+ */
+export function normalizarEstiloModuloQr(
+  estilo: EstiloModuloQr = 'quadrado'
+): EstiloModuloQrCanonico {
+  return MAPA_ESTILO_MODULO_QR[estilo] ?? 'quadrado';
+}
+
+/*
+ * Recebe: estilo dos olhos/cantos do QR Code em português ou inglês.
+ * Devolve: estilo canônico ('quadrado', 'arredondado' ou 'circulo').
+ * Por que é usada: permite configurar estilos de cantos em português e inglês.
+ */
+export function normalizarEstiloOlhoQr(
+  estilo: EstiloOlhoQr = 'quadrado'
+): EstiloOlhoQrCanonico {
+  return MAPA_ESTILO_OLHO_QR[estilo] ?? 'quadrado';
 }
 
 /**
@@ -110,7 +156,9 @@ function pathCirculoSvg(cx: number, cy: number, r: number): string {
 }
 
 function gerarPathOlhoUnicoSvg(ox: number, oy: number, estilo: EstiloOlhoQr): string {
-  if (estilo === 'circulo') {
+  const estiloCanonico = normalizarEstiloOlhoQr(estilo);
+
+  if (estiloCanonico === 'circulo') {
     const cx = ox + 3.5;
     const cy = oy + 3.5;
     return [
@@ -120,9 +168,9 @@ function gerarPathOlhoUnicoSvg(ox: number, oy: number, estilo: EstiloOlhoQr): st
     ].join('');
   }
 
-  const rExt = estilo === 'arredondado' ? 1.8 : 0;
-  const rInt = estilo === 'arredondado' ? 1.1 : 0;
-  const rMiolo = estilo === 'arredondado' ? 0.75 : 0;
+  const rExt = estiloCanonico === 'arredondado' ? 1.8 : 0;
+  const rInt = estiloCanonico === 'arredondado' ? 1.1 : 0;
+  const rMiolo = estiloCanonico === 'arredondado' ? 0.75 : 0;
 
   return [
     pathRetanguloArredondadoSvg(ox, oy, 7, 7, rExt),
@@ -138,8 +186,8 @@ export function gerarPathSvgQrCode(
   conteudo: string,
   opcoes: OpcoesSvgQrCode = {}
 ): SvgQrCodeEstilizado {
-  const estiloModulos = opcoes.estiloModulos || 'quadrado';
-  const estiloOlhos = opcoes.estiloOlhos || 'quadrado';
+  const estiloModulos = normalizarEstiloModuloQr(opcoes.estiloModulos);
+  const estiloOlhos = normalizarEstiloOlhoQr(opcoes.estiloOlhos);
   const temLogo = Boolean(opcoes.temLogo);
   const tamanhoLogoPct = opcoes.tamanhoLogoPct ?? 22;
 

@@ -13,12 +13,19 @@ import type {
   OrientacaoCertificado,
   TemplateCertificado
 } from '../types/certificado';
+import { normalizarDirecaoPontaSeta } from '../composables/gerenciadorDeCamadas';
 import {
   ehModuloAreaLogoQr,
   ehModuloOlhoQr,
+  normalizarEstiloModuloQr,
+  normalizarEstiloOlhoQr,
   obterMatrizQrCode
 } from './qrcode';
-import { enriquecerDadosComLinkQrCode, resolverConteudoInternoQrCode, resolverVariaveisTexto } from './variaveis';
+import {
+  enriquecerDadosComLinkQrCode,
+  resolverConteudoInternoQrCode,
+  resolverVariaveisTexto
+} from './variaveis';
 
 // Dimensões lógicas padrão em pixels (96 DPI) para folha A4
 export const DIMENSOES_A4: Record<OrientacaoCertificado, { largura: number; altura: number }> = {
@@ -134,7 +141,7 @@ export function desenharLinhaOuSetaCanvas(
   );
 
   const ehSeta = camada.tipo === 'seta';
-  const direcao = camada.pontaSeta || 'direita';
+  const direcao = normalizarDirecaoPontaSeta(camada.pontaSeta);
   const temPontaEsquerda = ehSeta && (direcao === 'esquerda' || direcao === 'ambas');
   const temPontaDireita = ehSeta && (direcao === 'direita' || direcao === 'ambas');
 
@@ -280,19 +287,21 @@ export function desenharImagemAjustada(
   ctx.drawImage(img, dx, dy, dw, dh);
 }
 
-/**
- * Renderiza o template completo diretamente em um Canvas 2D em alta resolução.
+/*
+ * Recebe: template, dados dinâmicos, fator de escala e dimensões customizadas opcionais.
+ * Devolve: Promise<HTMLCanvasElement> com o template renderizado.
+ * Por que é usada: renderiza o template em Canvas 2D sem depender de estado global mutável.
  */
 export async function renderizarParaCanvas2D(
   template: TemplateCertificado,
   dados: DadosCertificado = {},
-  escala = 2
+  escala = 2,
+  dimensoesCustom?: { largura: number; altura: number }
 ): Promise<HTMLCanvasElement> {
-  if (typeof document !== 'undefined' && document.fonts && document.fonts.ready) {
-    await document.fonts.ready;
-  }
+  const orientacao = template.orientacao === 'portrait' ? 'portrait' : 'landscape';
 
-  const dim = DIMENSOES_A4[template.orientacao] || DIMENSOES_A4.landscape;
+  // Dimensões finais usadas no canvas, priorizando o valor customizado recebido por parâmetro
+  const dim = dimensoesCustom ?? DIMENSOES_A4[orientacao] ?? DIMENSOES_A4.landscape;
   const canvas = document.createElement('canvas');
   canvas.width = dim.largura * escala;
   canvas.height = dim.altura * escala;
@@ -418,8 +427,8 @@ export async function renderizarParaCanvas2D(
       const { tamanho, modulos } = obterMatrizQrCode(conteudoResolvido, 'H');
       const pad = camada.margemQr ?? 6;
       const raioCaixa = camada.raioFundoQr || 0;
-      const estiloModulos = camada.estiloModulosQr || 'quadrado';
-      const estiloOlhos = camada.estiloOlhosQr || 'quadrado';
+      const estiloModulos = normalizarEstiloModuloQr(camada.estiloModulosQr);
+      const estiloOlhos = normalizarEstiloOlhoQr(camada.estiloOlhosQr);
       const corModulos = camada.corQr || '#0f172a';
       const corOlhos = camada.corOlhosQr || corModulos;
       const corFundo = camada.corFundoQr || '#ffffff';

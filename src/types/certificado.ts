@@ -1,19 +1,54 @@
 /*
 ========
-Definições de tipos e interfaces da biblioteca vue-template-studio (src/types/certificado.ts).
-Inclui contratos completos em português e equivalentes em inglês (TemplateDocument, TemplateLayer,
-TemplateVariable, TemplateStudioOptions, etc.) para facilitar a adoção global via npm mantendo
-100% de compatibilidade com os nomes em português.
+Definições de tipos e interfaces públicas da biblioteca (src/types/certificado.ts).
+Centraliza a tipagem de templates, camadas, formatos de folha, alinhamento,
+variáveis, exportação, classes e rótulos com suporte bilíngue (português e inglês).
 ========
 */
 import type { MensagensIdiomaParcial } from '../i18n';
 
-// Orientações suportadas na folha
 export type OrientacaoCertificado = 'landscape' | 'portrait';
-export type SheetOrientation = OrientacaoCertificado;
 
-// Formatos de folha pré-definidos ou personalizado
-export type FormatoFolha =
+export type AjusteFundo = 'cover' | 'contain' | '100% 100%';
+
+export type AjusteImagem = 'contain' | 'cover' | 'fill';
+
+export type EstiloBorda = 'solid' | 'dashed' | 'dotted';
+
+export type AlinhamentoTexto = 'left' | 'center' | 'right';
+
+export type AlinhamentoVertical = 'top' | 'middle' | 'bottom';
+
+// Estilos canônicos de módulos do QR Code usados internamente nos selects
+export type EstiloModuloQrCanonico = 'quadrado' | 'arredondado' | 'pontos';
+
+// Estilos de módulos do QR Code aceitos na API pública em português e inglês
+export type EstiloModuloQr = EstiloModuloQrCanonico | 'square' | 'rounded' | 'dots';
+
+// Estilos canônicos de olhos/cantos do QR Code usados internamente nos selects
+export type EstiloOlhoQrCanonico = 'quadrado' | 'arredondado' | 'circulo';
+
+// Estilos de olhos/cantos do QR Code aceitos na API pública em português e inglês
+export type EstiloOlhoQr = EstiloOlhoQrCanonico | 'square' | 'rounded' | 'circle';
+
+// Modos canônicos de exibição de link usados internamente nos selects
+export type ModoExibicaoLinkCanonico = 'url' | 'texto';
+
+// Modos de exibição de link aceitos na API pública em português e inglês
+export type ModoExibicaoLink = ModoExibicaoLinkCanonico | 'text';
+
+export type TipoCamada =
+  | 'texto'
+  | 'variavel'
+  | 'imagem'
+  | 'qrcode'
+  | 'circulo'
+  | 'linha'
+  | 'seta'
+  | 'forma';
+
+// Formatos de folha canônicos usados internamente nos presets e traduções
+export type FormatoFolhaCanonico =
   | 'a4'
   | 'a5'
   | 'carta'
@@ -21,49 +56,46 @@ export type FormatoFolha =
   | 'cartao'
   | 'quadrado'
   | 'custom';
-export type SheetFormat = FormatoFolha;
 
-// Estrutura de metadados de cada preset de formato de folha
-export interface PresetFormatoFolha {
-  id: FormatoFolha;
-  rotulo: string;
-  larguraBase: number;
-  alturaBase: number;
-}
-export type SheetFormatPreset = PresetFormatoFolha;
+// Formatos de folha aceitos na API pública em português e inglês
+export type FormatoFolha =
+  | FormatoFolhaCanonico
+  | 'letter'
+  | 'badge'
+  | 'card'
+  | 'square';
 
-// Tipos de camadas permitidos no editor
-export type TipoCamada =
-  | 'texto'
-  | 'variavel'
-  | 'imagem'
-  | 'forma'
-  | 'circulo'
-  | 'linha'
-  | 'seta'
-  | 'qrcode';
-export type LayerType = TipoCamada;
+// Direções canônicas da ponta de seta usadas na renderização
+export type DirecaoPontaSetaCanonica = 'esquerda' | 'direita' | 'ambas';
 
-// Alinhamentos horizontais para camadas de texto
-export type AlinhamentoTexto = 'left' | 'center' | 'right';
-export type TextAlignment = AlinhamentoTexto;
+// Direções de ponta de seta aceitas na API pública em português e inglês
+export type DirecaoPontaSeta =
+  | DirecaoPontaSetaCanonica
+  | 'left'
+  | 'right'
+  | 'both';
 
-// Alinhamentos verticais dentro da caixa de texto
-export type AlinhamentoVertical = 'top' | 'middle' | 'bottom';
-export type VerticalAlignment = AlinhamentoVertical;
-
-// Eixos de alinhamento rápido na folha
-export type EixoAlinhamentoFolha =
+// Eixos canônicos de alinhamento na folha
+export type EixoAlinhamentoFolhaCanonico =
   | 'esquerda'
   | 'centro-h'
   | 'direita'
   | 'topo'
   | 'centro-v'
   | 'base';
-export type SheetAlignmentAxis = EixoAlinhamentoFolha;
 
-// Posições da grade 3x3 estilo Figma (Quadrado de posicionamento explícito)
-export type PosicaoGrade3x3 =
+// Eixos de alinhamento na folha aceitos na API pública em português e inglês
+export type EixoAlinhamentoFolha =
+  | EixoAlinhamentoFolhaCanonico
+  | 'left'
+  | 'center-h'
+  | 'right'
+  | 'top'
+  | 'center-v'
+  | 'bottom';
+
+// Posições canônicas da matriz 3x3 usadas na UI e nas chaves do vue-i18n
+export type PosicaoGrade3x3Canonica =
   | 'topo-esquerda'
   | 'topo-centro'
   | 'topo-direita'
@@ -73,57 +105,27 @@ export type PosicaoGrade3x3 =
   | 'base-esquerda'
   | 'base-centro'
   | 'base-direita';
-export type Grid3x3Position = PosicaoGrade3x3;
 
-// Estilo do traço para formas, círculos, linhas e setas
-export type EstiloBorda = 'solid' | 'dashed' | 'dotted';
-export type BorderStyle = EstiloBorda;
+// Posições da matriz 3x3 aceitas na API pública em português e inglês
+export type PosicaoGrade3x3 =
+  | PosicaoGrade3x3Canonica
+  | 'top-left'
+  | 'top-center'
+  | 'top-right'
+  | 'middle-left'
+  | 'center'
+  | 'middle-right'
+  | 'bottom-left'
+  | 'bottom-center'
+  | 'bottom-right';
 
-// Direção da ponta da seta
-export type DirecaoPontaSeta = 'direita' | 'esquerda' | 'ambas';
-export type ArrowheadDirection = DirecaoPontaSeta;
-
-// Ajuste de preenchimento de imagem na folha ou camada
-export type AjusteImagem = 'contain' | 'cover' | 'fill';
-export type ImageFit = AjusteImagem;
-
-// Estilo visual dos módulos internos do QR Code
-export type EstiloModuloQr = 'quadrado' | 'arredondado' | 'pontos';
-export type QrModuleStyle = EstiloModuloQr;
-
-// Estilo visual dos 3 olhos (cantos de detecção) do QR Code
-export type EstiloOlhoQr = 'quadrado' | 'arredondado' | 'circulo';
-export type QrEyeStyle = EstiloOlhoQr;
-
-// Modo de exibição de uma camada de link (URL completa ou texto personalizado clicável)
-export type ModoExibicaoLink = 'url' | 'texto';
-export type LinkDisplayMode = ModoExibicaoLink;
-
-// Definição de variável aceitando propriedades em português ou em inglês (key, label, layerName, previewValue, defaultValue)
-export interface VariavelCertificado {
-  chave?: string;
-  rotulo?: string;
-  nomeCamada?: string;
-  valorVisualizacao?: string;
-  valorPadrao?: string;
-  key?: string;
-  label?: string;
-  layerName?: string;
-  previewValue?: string;
-  defaultValue?: string;
-}
-export type TemplateVariable = VariavelCertificado;
-
-// Variável normalizada internamente garantindo chave e rótulo sempre preenchidos
-export interface VariavelNormalizada {
-  chave: string;
+export interface PresetFormatoFolha {
+  id: FormatoFolhaCanonico;
   rotulo: string;
-  nomeCamada?: string;
-  valorVisualizacao?: string;
-  valorPadrao?: string;
+  larguraBase: number;
+  alturaBase: number;
 }
 
-// Estrutura completa de uma camada no template
 export interface CamadaCertificado {
   id: string;
   tipo: TipoCamada;
@@ -145,6 +147,9 @@ export interface CamadaCertificado {
   sublinhado?: boolean;
   alinhamento?: AlinhamentoTexto;
   alinhamentoVertical?: AlinhamentoVertical;
+  permitirEdicaoTexto?: boolean;
+  linkUrl?: string;
+  modoExibicaoLink?: ModoExibicaoLink;
   src?: string;
   ajusteImagem?: AjusteImagem;
   raioImagem?: number;
@@ -166,22 +171,15 @@ export interface CamadaCertificado {
   estiloOlhosQr?: EstiloOlhoQr;
   logoQr?: string;
   tamanhoLogoQr?: number;
-  fundoLogoQr?: boolean;
   raioLogoQr?: number;
-  permitirEdicaoTexto?: boolean;
-  linkUrl?: string;
-  modoExibicaoLink?: ModoExibicaoLink;
+  fundoLogoQr?: boolean;
 }
-export type TemplateLayer = CamadaCertificado;
 
-// Item da lista invertida de camadas exibida no painel lateral
 export interface ItemCamadaInvertida {
   camada: CamadaCertificado;
   indiceReal: number;
 }
-export type ReversedLayerItem = ItemCamadaInvertida;
 
-// Estrutura completa de um template (retrocompatível com A4 padrão e extensível para qualquer dimensão)
 export interface TemplateCertificado {
   id: string;
   nome: string;
@@ -191,39 +189,35 @@ export interface TemplateCertificado {
   altura?: number;
   fundoCor: string;
   fundoImagem: string;
-  fundoAjuste: 'cover' | 'contain' | '100% 100%';
+  fundoAjuste: AjusteFundo;
   camadas: CamadaCertificado[];
+  criadoEm?: string;
+  atualizadoEm?: string;
 }
-export type TemplateDocument = TemplateCertificado;
 
-// Dicionário de dados dinâmicos enviados pelo cliente para substituição de variáveis
-export type DadosCertificado = Record<string, string | number | undefined>;
-export type TemplateData = DadosCertificado;
+export type DadosCertificado = Record<string, string | number | boolean | null | undefined>;
 
-// Opções de exportação de imagem e PDF (aceita chaves em português e inglês)
-export interface OpcoesExportacao {
-  escala?: number;
-  nomeArquivo?: string;
-  qualidadeImagem?: number;
-  scale?: number;
-  fileName?: string;
-  imageQuality?: number;
+export interface VariavelCertificado {
+  chave?: string;
+  rotulo?: string;
+  nomeCamada?: string;
+  valorVisualizacao?: string;
+  valorPadrao?: string;
+  key?: string;
+  label?: string;
+  layerName?: string;
+  previewValue?: string;
+  defaultValue?: string;
 }
-export type ExportOptions = OpcoesExportacao;
 
-// Resultado retornado pelas funções de exportação (inclui chaves em português e inglês)
-export interface ResultadoExportacao {
-  imagemDataUrl: string;
-  imagemBlob: Blob | null;
-  pdfBlob: Blob;
-  nomeArquivo: string;
-  imageDataUrl?: string;
-  imageBlob?: Blob | null;
-  fileName?: string;
+export interface VariavelNormalizada {
+  chave: string;
+  rotulo: string;
+  nomeCamada?: string;
+  valorVisualizacao?: string;
+  valorPadrao?: string;
 }
-export type ExportResult = ResultadoExportacao;
 
-// Textos customizáveis de sobrescrita direta do editor e visualizador (aceita português e inglês)
 export interface CertificadoLabels {
   salvar?: string;
   exportarPdf?: string;
@@ -255,7 +249,6 @@ export interface CertificadoLabels {
   atualizarPreview?: string;
   baixarPdf?: string;
   renderizando?: string;
-  // Chaves equivalentes em inglês
   save?: string;
   exportPdf?: string;
   exportingPdf?: string;
@@ -287,9 +280,7 @@ export interface CertificadoLabels {
   downloadPdf?: string;
   rendering?: string;
 }
-export type TemplateStudioLabels = CertificadoLabels;
 
-// Classes CSS extras para customização externa (aceita português e inglês)
 export interface CertificadoClasses {
   root?: string;
   topo?: string;
@@ -302,7 +293,6 @@ export interface CertificadoClasses {
   painelCamadas?: string;
   dockFlutuante?: string;
   visualizador?: string;
-  // Chaves equivalentes em inglês
   topBar?: string;
   leftDock?: string;
   canvasStage?: string;
@@ -313,9 +303,7 @@ export interface CertificadoClasses {
   floatingDock?: string;
   viewer?: string;
 }
-export type TemplateStudioClasses = CertificadoClasses;
 
-// Opções globais configuráveis via app.use(TemplateStudioPlugin, options) ou configureTemplateStudio
 export interface CertificadoOptions {
   unstyled?: boolean;
   tema?: 'dark' | 'light';
@@ -346,4 +334,52 @@ export interface CertificadoOptions {
   labels?: CertificadoLabels;
   classes?: CertificadoClasses;
 }
+
+export interface OpcoesExportacao {
+  nomeArquivo?: string;
+  fileName?: string;
+  escala?: number;
+  scale?: number;
+  qualidade?: number;
+  quality?: number;
+  qualidadeImagem?: number;
+  imageQuality?: number;
+}
+
+export interface ResultadoExportacao {
+  imagemDataUrl: string;
+  imageDataUrl?: string;
+  imagemBlob: Blob | null;
+  imageBlob?: Blob | null;
+  pdfBlob: Blob;
+  nomeArquivo: string;
+  fileName?: string;
+}
+
+// Aliases completos em inglês para exportação pública no npm
+export type TemplateDocument = TemplateCertificado;
+export type TemplateLayer = CamadaCertificado;
+export type TemplateVariable = VariavelCertificado;
+export type NormalizedVariable = VariavelNormalizada;
+export type TemplateData = DadosCertificado;
+export type TemplateStudioLabels = CertificadoLabels;
+export type TemplateStudioClasses = CertificadoClasses;
 export type TemplateStudioOptions = CertificadoOptions;
+export type ExportOptions = OpcoesExportacao;
+export type ExportResult = ResultadoExportacao;
+export type SheetFormat = FormatoFolha;
+export type SheetFormatPreset = PresetFormatoFolha;
+export type SheetOrientation = OrientacaoCertificado;
+export type LayerType = TipoCamada;
+export type TextAlignment = AlinhamentoTexto;
+export type VerticalAlignment = AlinhamentoVertical;
+export type SheetAlignmentAxis = EixoAlinhamentoFolha;
+export type Grid3x3Position = PosicaoGrade3x3;
+export type BorderStyle = EstiloBorda;
+export type ArrowheadDirection = DirecaoPontaSeta;
+export type ImageFit = AjusteImagem;
+export type BackgroundFit = AjusteFundo;
+export type QrModuleStyle = EstiloModuloQr;
+export type QrEyeStyle = EstiloOlhoQr;
+export type LinkDisplayMode = ModoExibicaoLink;
+export type ReversedLayerItem = ItemCamadaInvertida;

@@ -12,11 +12,11 @@ import { mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import {
   TemplateStudioEditor,
-  VTemplateStudioEditor,
+  TemplateStudioEditor,
   TemplateStudioViewer,
-  VTemplateStudioViewer,
-  VCertificadoEditor,
-  VCertificadoVisualizador,
+  TemplateStudioViewer,
+  TemplateStudioEditor,
+  TemplateStudioViewer,
   LocaleSwitcher,
   createEmptyTemplate,
   criarTemplateVazio,
@@ -65,7 +65,7 @@ describe('Escopo: Internacionalização (pt_br, en, custom locales) e Camada de 
   });
 
   it('Deve renderizar todos os painéis em Português (pt_br) por padrão e alternar para Inglês (en) via prop locale', async () => {
-    const wrapper = mount(VCertificadoEditor, {
+    const wrapper = mount(TemplateStudioEditor, {
       props: {
         modelValue: criarTemplateVazio('Template Bilingue'),
         locale: 'pt_br'
@@ -147,7 +147,7 @@ describe('Escopo: Internacionalização (pt_br, en, custom locales) e Camada de 
     expect(obterIdiomasDisponiveis()).toContain('es');
     expect(getAvailableLocales()).toContain('es');
 
-    const wrapper = mount(VTemplateStudioEditor, {
+    const wrapper = mount(TemplateStudioEditor, {
       props: {
         modelValue: createEmptyTemplate('Plantilla'),
         locale: 'es',
@@ -235,8 +235,8 @@ describe('Escopo: Internacionalização (pt_br, en, custom locales) e Camada de 
 
     editor.unmount();
 
-    // Testa TemplateStudioViewer / VTemplateStudioViewer com props em inglês
-    const viewer = mount(VTemplateStudioViewer, {
+    // Testa TemplateStudioViewer / TemplateStudioViewer com props em inglês
+    const viewer = mount(TemplateStudioViewer, {
       props: {
         template: tpl,
         data: { recipient_name: 'Jane Doe' },
@@ -259,8 +259,8 @@ describe('Escopo: Internacionalização (pt_br, en, custom locales) e Camada de 
 
     viewer.unmount();
 
-    // Verifica que o alias antigo VCertificadoVisualizador continua funcionando
-    const legacyViewer = mount(VCertificadoVisualizador, {
+    // Verifica que o alias antigo TemplateStudioViewer continua funcionando
+    const legacyViewer = mount(TemplateStudioViewer, {
       props: {
         template: tpl,
         dados: {},

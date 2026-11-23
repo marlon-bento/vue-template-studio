@@ -46,6 +46,7 @@ import {
   criarCamadaTexto,
   duplicarCamada,
   moverCamadaPorId,
+  normalizarFormatoFolha,
   reordenarCamadaListaInvertida
 } from '../composables/gerenciadorDeCamadas';
 import { gerenciadorDeHistorico } from '../composables/gerenciadorDeHistorico';
@@ -58,6 +59,7 @@ import {
 import {
   CHAVE_VARIAVEL_LINK_QRCODE,
   CHAVES_LINK_QRCODE,
+  clonarSeguro,
   enriquecerDadosComLinkQrCode,
   temQrCodeNoTemplate
 } from '../utils/variaveis';
@@ -88,7 +90,6 @@ export interface PacoteEventoExportacao {
 
 export interface Props {
   modelValue?: TemplateCertificado;
-  // Props em inglês (primárias para npm)
   previewData?: DadosCertificado;
   availableFonts?: string[];
   availableVariables?: VariavelCertificado[];
@@ -101,7 +102,6 @@ export interface Props {
   labels?: CertificadoLabels;
   classes?: CertificadoClasses;
   maxUploadSizeMb?: number;
-  // Props equivalentes em português (retrocompatibilidade total)
   dadosPreview?: DadosCertificado;
   fontesDisponiveis?: string[];
   variaveisDisponiveis?: VariavelCertificado[];
@@ -138,7 +138,6 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   'update:modelValue': [template: TemplateCertificado];
-  // Eventos em inglês e português
   'save': [template: TemplateCertificado];
   'salvar': [template: TemplateCertificado];
   'export': [resultado: PacoteEventoExportacao];
@@ -178,7 +177,7 @@ watch(
 );
 
 // Cópia reativa local do template editado no estúdio
-const template = ref<TemplateCertificado>(JSON.parse(JSON.stringify(props.modelValue)));
+const template = ref<TemplateCertificado>(clonarSeguro(props.modelValue));
 
 // Identificador da camada atualmente selecionada no palco ou na lista
 const camadaSelecionadaId = ref<string | null>(null);
@@ -423,10 +422,9 @@ watch(
       atualizacaoInterna = false;
       return;
     }
-    const serialNovo = JSON.stringify(novo);
-    if (serialNovo === JSON.stringify(template.value)) return;
+    if (JSON.stringify(novo) === JSON.stringify(template.value)) return;
     const trocouTemplate = novo.id !== template.value.id;
-    template.value = JSON.parse(serialNovo);
+    template.value = clonarSeguro(novo);
     if (trocouTemplate) {
       camadaSelecionadaId.value = null;
       iniciar(template.value);
@@ -453,7 +451,7 @@ function emitirErro(mensagem: string): void {
  * Por que é usada: emite o template salvo simultaneamente nos eventos 'salvar' e 'save'.
  */
 function emitirSalvar(): void {
-  const copia = JSON.parse(JSON.stringify(template.value)) as TemplateCertificado;
+  const copia = clonarSeguro(template.value);
   emit('salvar', copia);
   emit('save', copia);
 }
@@ -466,18 +464,19 @@ function emitirSalvar(): void {
 function confirmarAlteracao(): void {
   registrar(template.value);
   atualizacaoInterna = true;
-  emit('update:modelValue', JSON.parse(JSON.stringify(template.value)));
+  emit('update:modelValue', clonarSeguro(template.value));
 }
 
 /*
- * Recebe: novo formato de folha selecionado (ex.: 'a4', 'cracha', 'custom').
+ * Recebe: novo formato de folha selecionado em português ou inglês.
  * Devolve: nada (void).
- * Por que é usada: aplica o preset de formato selecionado e recalcula a largura e altura da folha.
+ * Por que é usada: normaliza o formato, aplica o preset selecionado e recalcula a largura e altura da folha.
  */
 function selecionarFormatoFolha(novoFormato: FormatoFolha): void {
-  template.value.formato = novoFormato;
+  const formatoCanonico = normalizarFormatoFolha(novoFormato);
+  template.value.formato = formatoCanonico;
   const novasDimensoes = obterDimensoesPorFormato(
-    novoFormato,
+    formatoCanonico,
     template.value.orientacao,
     template.value.largura,
     template.value.altura
@@ -508,7 +507,9 @@ function alterarDimensoesFolha(largura: number, altura: number): void {
  * Por que é usada: inverte entre Paisagem e Retrato ajustando as dimensões do formato atual.
  */
 function alternarOrientacaoFolha(nova: OrientacaoCertificado): void {
-  const formato = template.value.formato;
+  const formato = template.value.formato
+    ? normalizarFormatoFolha(template.value.formato)
+    : undefined;
   template.value.orientacao = nova;
 
   if (formato === 'custom' && template.value.largura && template.value.altura) {
@@ -545,7 +546,7 @@ function acaoDesfazer(): void {
     camadaSelecionadaId.value = null;
   }
   atualizacaoInterna = true;
-  emit('update:modelValue', JSON.parse(JSON.stringify(template.value)));
+  emit('update:modelValue', clonarSeguro(template.value));
 }
 
 /*
@@ -558,7 +559,7 @@ function acaoRefazer(): void {
   if (!proximo) return;
   template.value = proximo;
   atualizacaoInterna = true;
-  emit('update:modelValue', JSON.parse(JSON.stringify(template.value)));
+  emit('update:modelValue', clonarSeguro(template.value));
 }
 
 /*
@@ -596,7 +597,7 @@ function excluirCamadaSelecionada(): void {
 }
 
 /*
- * Recebe: eixo de alinhamento na folha ('esquerda', 'centro-h', 'direita', 'topo', 'centro-v', 'base').
+ * Recebe: eixo de alinhamento na folha em português ou inglês.
  * Devolve: nada (void).
  * Por que é usada: posiciona a camada selecionada alinhada à borda ou centro da folha.
  */
@@ -607,7 +608,7 @@ function alinharNaFolha(eixo: EixoAlinhamentoFolha): void {
 }
 
 /*
- * Recebe: uma das 9 posições da matriz 3x3 da folha.
+ * Recebe: uma das 9 posições da matriz 3x3 da folha em português ou inglês.
  * Devolve: nada (void).
  * Por que é usada: posiciona a camada selecionada diretamente no ponto correspondente da grade 3x3.
  */
@@ -672,7 +673,7 @@ function adicionarLinha(): void {
 }
 
 /*
- * Recebe: direção inicial da ponta da seta ('direita', 'esquerda' ou 'ambas').
+ * Recebe: direção inicial da ponta da seta em português ou inglês.
  * Devolve: nada (void).
  * Por que é usada: insere uma nova camada de seta direcional vetorial no palco.
  */
@@ -873,7 +874,6 @@ onBeforeUnmount(() => {
 });
 
 defineExpose({
-  // Propriedades e métodos em português
   zoom,
   dimensoes,
   variaveisUsadas,
@@ -896,7 +896,6 @@ defineExpose({
   adicionarSeta,
   adicionarQrCode,
   adicionarLinkQrCode,
-  // Equivalentes em inglês
   dimensions: dimensoes,
   usedVariables: variaveisUsadas,
   effectivePreviewData: dadosPreviewEfetivos,
@@ -1040,7 +1039,7 @@ defineExpose({
           class="vc-dock-vertical-label"
           @click="painelDireitoMinimizado = false"
         >
-          {{ mergedLabels.propriedades }} &amp; {{ mergedLabels.camadas }}
+          {{ mergedLabels.propriedades }} & {{ mergedLabels.camadas }}
         </div>
 
         <template v-else>

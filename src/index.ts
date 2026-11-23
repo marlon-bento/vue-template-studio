@@ -1,11 +1,9 @@
 /*
 ========
 Ponto de entrada principal da biblioteca vue-template-studio (src/index.ts).
-Exporta componentes com nomes em inglês para o npm (TemplateStudioEditor, VTemplateStudioEditor,
-TemplateStudioViewer, VTemplateStudioViewer, LocaleSwitcher, StudioTopBar, ElementInsertPanel,
-TemplateCanvasStage, FigmaPropertiesPanel, LayerListPanel, VariableTextInput) e mantém aliases
-retrocompatíveis em português (VCertificadoEditor, VCertificadoVisualizador, etc.) usando
-reexportação ES Module pura compatível com declaration: true no vue-tsc.
+Exporta os componentes principais (TemplateStudioEditor, TemplateStudioViewer e LocaleSwitcher),
+subcomponentes do editor, utilitários, composables, tipos e o plugin de instalação global
+usando reexportação ES Module pura compatível com declaration: true no vue-tsc.
 ========
 */
 import type { App } from 'vue';
@@ -77,6 +75,9 @@ import {
 import {
   DIMENSOES_CAMADAS_A4,
   PRESETS_FORMATOS_FOLHA,
+  normalizarFormatoFolha,
+  normalizarDirecaoPontaSeta,
+  normalizarModoExibicaoLink,
   obterDimensoesPorFormato,
   resolverDimensoesTemplate,
   reordenarCamadaListaInvertida,
@@ -100,6 +101,8 @@ import {
 } from './composables/gerenciadorDePalco';
 import {
   POSICOES_GRADE_3X3,
+  normalizarEixoAlinhamentoFolha,
+  normalizarPosicaoGrade3x3,
   alinharCamadaNoEixoFolha,
   alinharCamadaNaGrade3x3Folha,
   detectarPosicaoGrade3x3Folha,
@@ -107,6 +110,8 @@ import {
   detectarPosicaoGrade3x3Texto
 } from './composables/gerenciadorDeAlinhamento';
 import {
+  normalizarEstiloModuloQr,
+  normalizarEstiloOlhoQr,
   ehModuloAreaLogoQr,
   ehModuloOlhoQr,
   obterMatrizQrCode,
@@ -136,15 +141,9 @@ import {
 import { svgs } from './styles/svgs';
 
 export {
-  // Componentes principais e aliases em inglês e português
   TemplateStudioEditor,
-  TemplateStudioEditor as VTemplateStudioEditor,
-  TemplateStudioEditor as VCertificadoEditor,
   TemplateStudioViewer,
-  TemplateStudioViewer as VTemplateStudioViewer,
-  TemplateStudioViewer as VCertificadoVisualizador,
   LocaleSwitcher,
-  // Subcomponentes em português e aliases em inglês
   BarraSuperiorEditor,
   BarraSuperiorEditor as StudioTopBar,
   PainelInsercaoElementos,
@@ -157,7 +156,6 @@ export {
   PainelCamadasLista as LayerListPanel,
   CampoTextoVariavel,
   CampoTextoVariavel as VariableTextInput,
-  // Internacionalização (i18n)
   i18n,
   pt_br,
   en,
@@ -174,7 +172,6 @@ export {
   getAvailableLocales,
   usarI18nCertificado,
   useTemplateI18n,
-  // Constantes e composables em português e inglês
   DIMENSOES_A4,
   DIMENSOES_A4 as A4_DIMENSIONS,
   DIMENSOES_CAMADAS_A4,
@@ -189,6 +186,20 @@ export {
   globalTemplateStudioOptions,
   normalizarListaVariaveis,
   normalizeVariableList,
+  normalizarFormatoFolha,
+  normalizarFormatoFolha as normalizeSheetFormat,
+  normalizarDirecaoPontaSeta,
+  normalizarDirecaoPontaSeta as normalizeArrowheadDirection,
+  normalizarModoExibicaoLink,
+  normalizarModoExibicaoLink as normalizeLinkDisplayMode,
+  normalizarEixoAlinhamentoFolha,
+  normalizarEixoAlinhamentoFolha as normalizeSheetAlignmentAxis,
+  normalizarPosicaoGrade3x3,
+  normalizarPosicaoGrade3x3 as normalizeGrid3x3Position,
+  normalizarEstiloModuloQr,
+  normalizarEstiloModuloQr as normalizeQrModuleStyle,
+  normalizarEstiloOlhoQr,
+  normalizarEstiloOlhoQr as normalizeQrEyeStyle,
   montarDadosVisualizacao,
   buildPreviewData,
   configureCertificado,
@@ -273,6 +284,7 @@ export type {
 export type {
   OrientacaoCertificado,
   SheetOrientation,
+  FormatoFolhaCanonico,
   FormatoFolha,
   SheetFormat,
   PresetFormatoFolha,
@@ -283,25 +295,34 @@ export type {
   TextAlignment,
   AlinhamentoVertical,
   VerticalAlignment,
+  EixoAlinhamentoFolhaCanonico,
   EixoAlinhamentoFolha,
   SheetAlignmentAxis,
+  PosicaoGrade3x3Canonica,
   PosicaoGrade3x3,
   Grid3x3Position,
   EstiloBorda,
   BorderStyle,
+  DirecaoPontaSetaCanonica,
   DirecaoPontaSeta,
   ArrowheadDirection,
   AjusteImagem,
   ImageFit,
+  AjusteFundo,
+  BackgroundFit,
+  EstiloModuloQrCanonico,
   EstiloModuloQr,
   QrModuleStyle,
+  EstiloOlhoQrCanonico,
   EstiloOlhoQr,
   QrEyeStyle,
+  ModoExibicaoLinkCanonico,
   ModoExibicaoLink,
   LinkDisplayMode,
   VariavelCertificado,
   TemplateVariable,
   VariavelNormalizada,
+  NormalizedVariable,
   CamadaCertificado,
   TemplateLayer,
   ItemCamadaInvertida,
@@ -343,8 +364,13 @@ export type {
   IconTree
 };
 
-// Plugin Vue para instalação global via app.use(TemplateStudioPlugin, options) ou app.use(CertificadoPlugin, options)
+// Plugin Vue para instalação global dos componentes e opções padrão da biblioteca
 export const TemplateStudioPlugin = {
+  /*
+   * Recebe: instância da aplicação Vue e opções parciais de configuração global.
+   * Devolve: nada (void).
+   * Por que é usada: registra os componentes globais e inicializa o i18n ao instalar o plugin via app.use().
+   */
   install(app: App, options?: Partial<CertificadoOptions>) {
     if (options) {
       configureCertificado(options);
@@ -353,11 +379,7 @@ export const TemplateStudioPlugin = {
       app.use(i18n);
     }
     app.component('TemplateStudioEditor', TemplateStudioEditor);
-    app.component('VTemplateStudioEditor', TemplateStudioEditor);
-    app.component('VCertificadoEditor', TemplateStudioEditor);
     app.component('TemplateStudioViewer', TemplateStudioViewer);
-    app.component('VTemplateStudioViewer', TemplateStudioViewer);
-    app.component('VCertificadoVisualizador', TemplateStudioViewer);
     app.component('LocaleSwitcher', LocaleSwitcher);
   }
 };
@@ -366,15 +388,10 @@ export { TemplateStudioPlugin as CertificadoPlugin };
 
 export default TemplateStudioPlugin;
 
-// Integração nativa com Volar / vue-tsc para autocomplete automático no template Vue
 declare module 'vue' {
   export interface GlobalComponents {
     TemplateStudioEditor: typeof TemplateStudioEditor;
-    VTemplateStudioEditor: typeof TemplateStudioEditor;
-    VCertificadoEditor: typeof TemplateStudioEditor;
     TemplateStudioViewer: typeof TemplateStudioViewer;
-    VTemplateStudioViewer: typeof TemplateStudioViewer;
-    VCertificadoVisualizador: typeof TemplateStudioViewer;
     LocaleSwitcher: typeof LocaleSwitcher;
   }
 }

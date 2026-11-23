@@ -3,14 +3,14 @@
 Suíte de testes para área de QR Code customizável (tests/qrcode.spec.ts).
 Valida geração de matriz/SVG de QR Code (quadrado, arredondado, pontos/dots, olhos circulares),
 detecção de QR Code no template via temQrCodeNoTemplate (sem criar variável na tela),
-resolução interna do link com logo central na renderização Canvas 2D e edição no VCertificadoEditor.
+resolução interna do link com logo central na renderização Canvas 2D e edição no TemplateStudioEditor.
 ========
 */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import {
-  VCertificadoEditor,
+  TemplateStudioEditor,
   criarCamadaLinkQrCode,
   criarCamadaQrCode,
   criarTemplateVazio,
@@ -100,8 +100,8 @@ describe('Escopo: Área de QR Code Customizável e Logo Central', () => {
     expect(ctx.drawImage).toHaveBeenCalled();
   });
 
-  it('Deve permitir adicionar e customizar o QR Code no VCertificadoEditor sem exibir input de link', async () => {
-    const wrapper = mount(VCertificadoEditor, {
+  it('Deve permitir adicionar e customizar o QR Code no TemplateStudioEditor sem exibir input de link', async () => {
+    const wrapper = mount(TemplateStudioEditor, {
       props: { modelValue: criarTemplateVazio('Editor QR') }
     });
 
@@ -126,7 +126,7 @@ describe('Escopo: Área de QR Code Customizável e Logo Central', () => {
   });
 
   it('Deve exibir secao separada de Link do QR Code ao inserir QR Code, aceitar {{link_qrcode}} e {{link_validacao}} sem badge vermelho e suportar texto personalizado', async () => {
-    const wrapper = mount(VCertificadoEditor, {
+    const wrapper = mount(TemplateStudioEditor, {
       props: { modelValue: criarTemplateVazio('Editor Link QR') }
     });
 

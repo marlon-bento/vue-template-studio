@@ -25,6 +25,11 @@ import {
   detectarPosicaoGrade3x3Folha,
   detectarPosicaoGrade3x3Texto
 } from '../../composables/gerenciadorDeAlinhamento';
+import {
+  normalizarDirecaoPontaSeta,
+  normalizarModoExibicaoLink
+} from '../../composables/gerenciadorDeCamadas';
+import { normalizarEstiloModuloQr, normalizarEstiloOlhoQr } from '../../utils/qrcode';
 import { usarI18nCertificado } from '../../i18n';
 import CampoTextoVariavel from './CampoTextoVariavel.vue';
 import { buildIcons } from '../../utils/svgFactory';
@@ -88,6 +93,27 @@ const posicaoAtivaTexto3x3 = computed(() =>
   detectarPosicaoGrade3x3Texto(props.camadaSelecionada)
 );
 
+// Direção canônica da ponta da seta normalizada para destacar o botão ativo no inspetor
+const pontaSetaAtual = computed(() =>
+  normalizarDirecaoPontaSeta(props.camadaSelecionada?.pontaSeta)
+);
+
+// Modo de exibição canônico do link da camada selecionada ('url' ou 'texto')
+const modoExibicaoLinkAtual = computed(() =>
+  props.camadaSelecionada?.modoExibicaoLink
+    ? normalizarModoExibicaoLink(props.camadaSelecionada.modoExibicaoLink)
+    : undefined
+);
+
+// Estilos canônicos normalizados dos módulos e olhos do QR Code para o select do inspetor
+const estiloModulosQrAtual = computed(() =>
+  normalizarEstiloModuloQr(props.camadaSelecionada?.estiloModulosQr)
+);
+
+const estiloOlhosQrAtual = computed(() =>
+  normalizarEstiloOlhoQr(props.camadaSelecionada?.estiloOlhosQr)
+);
+
 /*
  * Recebe: identificador da posição 3x3 escolhida pelo usuário para o texto.
  * Devolve: nada (void).
@@ -141,7 +167,7 @@ function limparLinkPdf(): void {
  */
 function alterarModoExibicaoLink(ev: Event): void {
   if (!props.camadaSelecionada) return;
-  const modo = (ev.target as HTMLSelectElement).value as ModoExibicaoLink;
+  const modo = normalizarModoExibicaoLink((ev.target as HTMLSelectElement).value as ModoExibicaoLink);
   props.camadaSelecionada.modoExibicaoLink = modo;
   if (modo === 'url') {
     props.camadaSelecionada.texto = props.camadaSelecionada.linkUrl || '{{link_qrcode}}';
@@ -163,7 +189,7 @@ function alterarModoExibicaoLink(ev: Event): void {
  */
 function alterarEstiloModulosQr(ev: Event): void {
   if (!props.camadaSelecionada) return;
-  const val = (ev.target as HTMLSelectElement).value as EstiloModuloQr;
+  const val = normalizarEstiloModuloQr((ev.target as HTMLSelectElement).value as EstiloModuloQr);
   props.camadaSelecionada.estiloModulosQr = val;
   emit('confirmar-alteracao');
 }
@@ -175,7 +201,7 @@ function alterarEstiloModulosQr(ev: Event): void {
  */
 function alterarEstiloOlhosQr(ev: Event): void {
   if (!props.camadaSelecionada) return;
-  const val = (ev.target as HTMLSelectElement).value as EstiloOlhoQr;
+  const val = normalizarEstiloOlhoQr((ev.target as HTMLSelectElement).value as EstiloOlhoQr);
   props.camadaSelecionada.estiloOlhosQr = val;
   emit('confirmar-alteracao');
 }
@@ -252,8 +278,14 @@ function carregarLogoQrCode(evento: Event): void {
         <div class="vc-vazio">{{ vazioInspetor }}</div>
       </slot>
 
-      <slot v-else name="inspetor" :camada="camadaSelecionada" :confirmar="() => emit('confirmar-alteracao')">
-        <!-- 1. Nome e ações rápidas da camada -->
+      <slot
+        v-else
+        name="inspetor"
+        :camada="camadaSelecionada"
+        :layer="camadaSelecionada"
+        :confirmar="() => emit('confirmar-alteracao')"
+        :confirm="() => emit('confirmar-alteracao')"
+      >
         <div class="vc-bloco">
           <div class="vc-row-gap">
             <input
@@ -303,7 +335,6 @@ function carregarLogoQrCode(evento: Event): void {
           </div>
         </div>
 
-        <!-- 2. Posição, Dimensões & Aparência (compacto estilo Figma) -->
         <div class="vc-bloco vc-bloco-sep">
           <span class="vc-bloco-titulo">{{ t('inspetor.dimensoesAparencia') }}</span>
           <div class="vc-grid-2">
@@ -366,7 +397,6 @@ function carregarLogoQrCode(evento: Event): void {
           </div>
         </div>
 
-        <!-- 3. Conteúdo & Tipografia (Texto ou Variável) -->
         <div v-if="camadaSelecionada.tipo === 'texto' || camadaSelecionada.tipo === 'variavel'" class="vc-bloco vc-bloco-sep">
           <template v-if="camadaSelecionada.tipo === 'texto'">
             <span class="vc-bloco-titulo">{{ t('inspetor.conteudoTexto') }}</span>
@@ -464,7 +494,6 @@ function carregarLogoQrCode(evento: Event): void {
           </div>
         </div>
 
-        <!-- 4. Accordion: Alinhamento Unificado (Folha + Caixa, recolhido por padrão) -->
         <div class="vc-bloco vc-bloco-sep">
           <button
             type="button"
@@ -591,7 +620,6 @@ function carregarLogoQrCode(evento: Event): void {
           </div>
         </div>
 
-        <!-- 5. Accordion: Link no PDF (apenas para Texto e Variável; sem link pré-preenchido em variáveis comuns) -->
         <div
           v-if="camadaSelecionada.tipo === 'texto' || camadaSelecionada.tipo === 'variavel'"
           class="vc-bloco vc-bloco-sep"
@@ -630,10 +658,10 @@ function carregarLogoQrCode(evento: Event): void {
               />
             </label>
 
-            <label v-if="camadaSelecionada.modoExibicaoLink" class="vc-label">
+            <label v-if="modoExibicaoLinkAtual" class="vc-label">
               {{ t('inspetor.modoExibicaoLinkLabel') }}
               <select
-                :value="camadaSelecionada.modoExibicaoLink"
+                :value="modoExibicaoLinkAtual"
                 class="vc-field"
                 data-testid="select-modo-exibicao-link-inspetor"
                 @change="alterarModoExibicaoLink"
@@ -659,7 +687,6 @@ function carregarLogoQrCode(evento: Event): void {
           </div>
         </div>
 
-        <!-- 6. Estilo específico: Moldura ou Círculo -->
         <div
           v-if="camadaSelecionada.tipo === 'forma' || camadaSelecionada.tipo === 'circulo'"
           class="vc-bloco vc-bloco-sep"
@@ -729,7 +756,6 @@ function carregarLogoQrCode(evento: Event): void {
           </label>
         </div>
 
-        <!-- 7. Estilo específico: Linha ou Seta -->
         <div
           v-if="camadaSelecionada.tipo === 'linha' || camadaSelecionada.tipo === 'seta'"
           class="vc-bloco vc-bloco-sep"
@@ -777,7 +803,7 @@ function carregarLogoQrCode(evento: Event): void {
               <button
                 type="button"
                 @click="camadaSelecionada.pontaSeta = 'esquerda'; emit('confirmar-alteracao')"
-                :class="['vc-chip', camadaSelecionada.pontaSeta === 'esquerda' ? 'ativo' : '']"
+                :class="['vc-chip', pontaSetaAtual === 'esquerda' ? 'ativo' : '']"
                 data-testid="seta-esquerda"
               >
                 {{ t('inspetor.setaEsquerda') }}
@@ -785,7 +811,7 @@ function carregarLogoQrCode(evento: Event): void {
               <button
                 type="button"
                 @click="camadaSelecionada.pontaSeta = 'direita'; emit('confirmar-alteracao')"
-                :class="['vc-chip', (!camadaSelecionada.pontaSeta || camadaSelecionada.pontaSeta === 'direita') ? 'ativo' : '']"
+                :class="['vc-chip', pontaSetaAtual === 'direita' ? 'ativo' : '']"
                 data-testid="seta-direita"
               >
                 {{ t('inspetor.setaDireita') }}
@@ -793,7 +819,7 @@ function carregarLogoQrCode(evento: Event): void {
               <button
                 type="button"
                 @click="camadaSelecionada.pontaSeta = 'ambas'; emit('confirmar-alteracao')"
-                :class="['vc-chip', camadaSelecionada.pontaSeta === 'ambas' ? 'ativo' : '']"
+                :class="['vc-chip', pontaSetaAtual === 'ambas' ? 'ativo' : '']"
                 data-testid="seta-ambas"
               >
                 {{ t('inspetor.setaAmbas') }}
@@ -802,7 +828,6 @@ function carregarLogoQrCode(evento: Event): void {
           </div>
         </div>
 
-        <!-- 8. Estilo específico: Imagem -->
         <div v-if="camadaSelecionada.tipo === 'imagem'" class="vc-bloco vc-bloco-sep">
           <span class="vc-bloco-titulo">{{ t('inspetor.ajusteImagem') }}</span>
           <select
@@ -826,7 +851,6 @@ function carregarLogoQrCode(evento: Event): void {
           </label>
         </div>
 
-        <!-- 9. Estilo específico: QR Code -->
         <div v-if="camadaSelecionada.tipo === 'qrcode'" class="vc-bloco vc-bloco-sep">
           <span class="vc-bloco-titulo">{{ t('inspetor.estiloCoresQr') }}</span>
 
@@ -834,7 +858,7 @@ function carregarLogoQrCode(evento: Event): void {
             <label class="vc-label">
               {{ t('inspetor.pontosModulosQr') }}
               <select
-                :value="camadaSelecionada.estiloModulosQr || 'quadrado'"
+                :value="estiloModulosQrAtual"
                 @change="alterarEstiloModulosQr"
                 class="vc-field"
                 data-testid="select-estilo-modulos-qr"
@@ -848,7 +872,7 @@ function carregarLogoQrCode(evento: Event): void {
             <label class="vc-label">
               {{ t('inspetor.cantosOlhosQr') }}
               <select
-                :value="camadaSelecionada.estiloOlhosQr || 'quadrado'"
+                :value="estiloOlhosQrAtual"
                 @change="alterarEstiloOlhosQr"
                 class="vc-field"
                 data-testid="select-estilo-olhos-qr"

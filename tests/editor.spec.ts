@@ -1,15 +1,15 @@
 /*
 ========
-Suíte de testes do componente <VCertificadoEditor> e seus subcomponentes (tests/editor.spec.ts).
+Suíte de testes do componente <TemplateStudioEditor> e seus subcomponentes (tests/editor.spec.ts).
 Valida layout modular, quadrado interativo 3x3 estilo Figma (folha e caixa de texto),
 variáveis e valores de pré-visualização informados pelo cliente (sem hardcode na biblioteca),
 pan com Espaço+Arrastar, zoom com Ctrl+Scroll, medidas com Alt, drag-and-drop e atalhos.
 ========
 */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { mount } from '@vue/test-utils';
+import { mount, flushPromises } from '@vue/test-utils';
 import { defineComponent, nextTick, ref } from 'vue';
-import { DIMENSOES_A4, VCertificadoEditor, criarTemplateVazio } from '../src/index';
+import { DIMENSOES_A4, TemplateStudioEditor, criarTemplateVazio } from '../src/index';
 import { instalarMockCanvas2D, resetarEstadoCertificado } from './helpers';
 
 vi.mock('jspdf', () => {
@@ -26,7 +26,7 @@ vi.mock('jspdf', () => {
   return { jsPDF: MockJsPDF };
 });
 
-describe('Escopo: Componente <VCertificadoEditor> e Subcomponentes Modulares', () => {
+describe('Escopo: Componente <TemplateStudioEditor> e Subcomponentes Modulares', () => {
   beforeEach(() => {
     resetarEstadoCertificado();
     instalarMockCanvas2D();
@@ -37,7 +37,7 @@ describe('Escopo: Componente <VCertificadoEditor> e Subcomponentes Modulares', (
   });
 
   it('Não deve trazer variáveis hardcoded por padrão e deve usar as variáveis e valores de visualização informados pelo cliente ao clicar em Pré-visualizar', async () => {
-    const wrapperSemVariaveis = mount(VCertificadoEditor, {
+    const wrapperSemVariaveis = mount(TemplateStudioEditor, {
       props: {
         modelValue: criarTemplateVazio('Sem Hardcode')
       }
@@ -48,7 +48,7 @@ describe('Escopo: Componente <VCertificadoEditor> e Subcomponentes Modulares', (
     expect(wrapperSemVariaveis.text()).not.toContain('+ Professor');
     wrapperSemVariaveis.unmount();
 
-    const wrapperComCliente = mount(VCertificadoEditor, {
+    const wrapperComCliente = mount(TemplateStudioEditor, {
       props: {
         modelValue: criarTemplateVazio('Cliente Custom'),
         variaveisDisponiveis: [
@@ -87,7 +87,7 @@ describe('Escopo: Componente <VCertificadoEditor> e Subcomponentes Modulares', (
 
   it('Deve posicionar na folha e alinhar texto na caixa clicando no quadrado visual 3x3 estilo Figma', async () => {
     const tpl = criarTemplateVazio('Quadrado 3x3 Figma', 'landscape');
-    const wrapper = mount(VCertificadoEditor, {
+    const wrapper = mount(TemplateStudioEditor, {
       props: { modelValue: tpl },
       attachTo: document.body
     });
@@ -121,7 +121,7 @@ describe('Escopo: Componente <VCertificadoEditor> e Subcomponentes Modulares', (
   });
 
   it('Deve renderizar layout estilo Photoshop CS6 com camadas em baixo e sem opções de ordem ao selecionar elemento', async () => {
-    const wrapper = mount(VCertificadoEditor, {
+    const wrapper = mount(TemplateStudioEditor, {
       props: {
         modelValue: criarTemplateVazio('Meu Certificado')
       }
@@ -146,7 +146,7 @@ describe('Escopo: Componente <VCertificadoEditor> e Subcomponentes Modulares', (
 
   it('Deve alinhar camada na folha e alinhar texto verticalmente dentro da caixa estilo Figma', async () => {
     const tpl = criarTemplateVazio('Alinhamento', 'landscape');
-    const wrapper = mount(VCertificadoEditor, {
+    const wrapper = mount(TemplateStudioEditor, {
       props: { modelValue: tpl },
       attachTo: document.body
     });
@@ -177,7 +177,7 @@ describe('Escopo: Componente <VCertificadoEditor> e Subcomponentes Modulares', (
   });
 
   it('Deve suportar pan com Espaço+Arrastar, zoom com Ctrl+Scroll e medidas em px com Alt', async () => {
-    const wrapper = mount(VCertificadoEditor, {
+    const wrapper = mount(TemplateStudioEditor, {
       props: { modelValue: criarTemplateVazio('Figma Nav') },
       attachTo: document.body
     });
@@ -225,7 +225,7 @@ describe('Escopo: Componente <VCertificadoEditor> e Subcomponentes Modulares', (
 
   it('Deve medir a distância estilo Figma até outro elemento quando o mouse estiver sobre ele segurando Alt', async () => {
     const tpl = criarTemplateVazio('Alt Entre Elementos', 'landscape');
-    const wrapper = mount(VCertificadoEditor, {
+    const wrapper = mount(TemplateStudioEditor, {
       props: { modelValue: tpl },
       attachTo: document.body
     });
@@ -257,7 +257,7 @@ describe('Escopo: Componente <VCertificadoEditor> e Subcomponentes Modulares', (
 
   it('Deve permitir girar a camada pela alça de rotação (com snap de 15° no Shift) e redimensionar mantendo a proporção com Shift', async () => {
     const tpl = criarTemplateVazio('Rotação e Proporção', 'landscape');
-    const wrapper = mount(VCertificadoEditor, {
+    const wrapper = mount(TemplateStudioEditor, {
       props: { modelValue: tpl },
       attachTo: document.body
     });
@@ -292,7 +292,7 @@ describe('Escopo: Componente <VCertificadoEditor> e Subcomponentes Modulares', (
   });
 
   it('Deve bloquear criação de novas variáveis por padrão e liberar somente quando permitirCriarVariavel=true', async () => {
-    const wrapperBloqueado = mount(VCertificadoEditor, {
+    const wrapperBloqueado = mount(TemplateStudioEditor, {
       props: {
         variaveisDisponiveis: [
           { chave: 'nome_aluno', rotulo: '+ Aluno' }
@@ -303,7 +303,7 @@ describe('Escopo: Componente <VCertificadoEditor> e Subcomponentes Modulares', (
     expect(wrapperBloqueado.find('input[placeholder="campo_extra"]').exists()).toBe(false);
     expect(wrapperBloqueado.findAll('.vc-dock-esq .vc-grid-2 .vc-chip')).toHaveLength(1);
 
-    const wrapperLiberado = mount(VCertificadoEditor, {
+    const wrapperLiberado = mount(TemplateStudioEditor, {
       props: {
         permitirCriarVariavel: true
       }
@@ -323,7 +323,7 @@ describe('Escopo: Componente <VCertificadoEditor> e Subcomponentes Modulares', (
   });
 
   it('Deve permitir minimizar e expandir o painel esquerdo, painel direito e a seção de camadas', async () => {
-    const wrapper = mount(VCertificadoEditor);
+    const wrapper = mount(TemplateStudioEditor);
 
     await wrapper.find('button[aria-label="Alternar painel Inserir"]').trigger('click');
     expect(wrapper.find('.vc-dock-esq').classes()).toContain('minimizado');
@@ -339,16 +339,16 @@ describe('Escopo: Componente <VCertificadoEditor> e Subcomponentes Modulares', (
 
   it('Deve reordenar camadas via drag-and-drop na aba de camadas e preservar histórico de Ctrl+Z com v-model', async () => {
     const HostComVModel = defineComponent({
-      components: { VCertificadoEditor },
+      components: { TemplateStudioEditor },
       setup() {
         const tpl = ref(criarTemplateVazio('Teste v-model'));
         return { tpl };
       },
-      template: `<VCertificadoEditor v-model="tpl" />`
+      template: `<TemplateStudioEditor v-model="tpl" />`
     });
 
     const wrapper = mount(HostComVModel, { attachTo: document.body });
-    const editor = wrapper.findComponent(VCertificadoEditor);
+    const editor = wrapper.findComponent(TemplateStudioEditor);
 
     await editor.findAll('button.vc-btn-sutil')[0].trigger('click');
     await editor.findAll('button.vc-btn-sutil')[1].trigger('click');
@@ -379,7 +379,7 @@ describe('Escopo: Componente <VCertificadoEditor> e Subcomponentes Modulares', (
   });
 
   it('Deve suportar atalhos Ctrl+D, setas do teclado, Delete e respeitar bloqueio de camada', async () => {
-    const wrapper = mount(VCertificadoEditor, { attachTo: document.body });
+    const wrapper = mount(TemplateStudioEditor, { attachTo: document.body });
     const vm = wrapper.vm as unknown as {
       adicionarTexto: (t: string, n: string, v: boolean) => void;
     };
@@ -411,7 +411,7 @@ describe('Escopo: Componente <VCertificadoEditor> e Subcomponentes Modulares', (
   });
 
   it('Deve emitir salvar, exportar e suportar customização de tema, labels e modo unstyled', async () => {
-    const wrapper = mount(VCertificadoEditor, {
+    const wrapper = mount(TemplateStudioEditor, {
       props: {
         tema: 'light',
         unstyled: false,
@@ -426,10 +426,10 @@ describe('Escopo: Componente <VCertificadoEditor> e Subcomponentes Modulares', (
     expect(wrapper.emitted('salvar')).toBeTruthy();
 
     await wrapper.find('.vc-pill-btn.primario').trigger('click');
-    await nextTick();
+    await flushPromises();
     expect(wrapper.emitted('exportar')).toBeTruthy();
 
-    const wrapperUnstyled = mount(VCertificadoEditor, {
+    const wrapperUnstyled = mount(TemplateStudioEditor, {
       props: { unstyled: true }
     });
     expect(wrapperUnstyled.find('.vc-estudio').exists()).toBe(false);
