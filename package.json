@@ -1,7 +1,7 @@
 {
   "name": "vue-template-studio",
   "private": false,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Márlon Bento Azevedo (https://github.com/marlon-bento)",
   "license": "MIT",
   "description": "Highly customizable Vue 3 + TypeScript visual studio for layer-based template creation (Figma/Photoshop style), live preview, i18n (pt-BR, EN & custom locales), and high-DPI PDF/image export.",
