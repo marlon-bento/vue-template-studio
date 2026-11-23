@@ -81,6 +81,8 @@
     "vite-plugin-dts": "^3.9.0",
     "vitest": "^2.1.9",
     "vue": "^3.4.21",
-    "vue-tsc": "^2.0.0"
+    "vue-tsc": "^2.0.0",
+    "@release-it/conventional-changelog": "^11.0.1",
+    "release-it": "^20.2.1"
   }
 }
