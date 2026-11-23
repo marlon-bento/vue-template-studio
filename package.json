@@ -5,6 +5,10 @@
   "author": "Márlon Bento Azevedo (https://github.com/marlon-bento)",
   "license": "MIT",
   "description": "Highly customizable Vue 3 + TypeScript visual studio for layer-based template creation (Figma/Photoshop style), live preview, i18n (pt-BR, EN & custom locales), and high-DPI PDF/image export.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/marlon-bento/vue-template-studio"
+  },
   "keywords": [
     "vue",
     "vue3",
